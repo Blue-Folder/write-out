@@ -1,0 +1,1661 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>WRITE OUT</title>
+<meta name="description" content="Soukromý zápisník na ručně psané poznámky.">
+<meta name="theme-color" content="#F7F8FA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1F2227" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="WRITE OUT">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+</head>
+<body>
+<style>
+:root{
+  --desk:#D7DBE1; --desk-dot:rgba(38,50,80,.17);
+  --chrome:#F7F8FA; --chrome-2:#ECEFF3;
+  --ink:#1A1E27; --muted:#626A79; --line:#C6CCD5;
+  --accent:#2B3FC4; --accent-ink:#FFFFFF; --accent-soft:rgba(43,63,196,.12);
+  --paper:#FEFEFC; --paper-ink:#1B1F27; --rule:#CCD5E3; --rule-strong:#A9B6CC; --margin:#E9B9B5;
+  --sel:#2B3FC4; --sel-soft:rgba(43,63,196,.07);
+  --page-shadow:rgba(22,30,52,.20);
+  --shadow:0 1px 2px rgba(20,28,48,.08),0 6px 20px rgba(20,28,48,.10);
+  --danger:#B3261E; --ok:#2E8F63;
+  --ui:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --display:"Big Shoulders Display",Impact,"Arial Narrow",sans-serif;
+  --serif:Literata,Georgia,"Times New Roman",serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --desk:#15171B; --desk-dot:rgba(205,215,238,.10);
+    --chrome:#1F2227; --chrome-2:#2A2E35;
+    --ink:#E7E9ED; --muted:#9AA1AD; --line:#363B44;
+    --accent:#8C99FF; --accent-ink:#0E1330; --accent-soft:rgba(140,153,255,.16);
+    --page-shadow:rgba(0,0,0,.55);
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+    --danger:#FF8A80; --ok:#5BD19A;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --desk:#15171B; --desk-dot:rgba(205,215,238,.10);
+  --chrome:#1F2227; --chrome-2:#2A2E35;
+  --ink:#E7E9ED; --muted:#9AA1AD; --line:#363B44;
+  --accent:#8C99FF; --accent-ink:#0E1330; --accent-soft:rgba(140,153,255,.16);
+  --page-shadow:rgba(0,0,0,.55);
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+  --danger:#FF8A80; --ok:#5BD19A;
+}
+[hidden]{display:none!important}
+html{height:100%;box-sizing:border-box}
+*,*::before,*::after{box-sizing:border-box}
+body{height:100%;margin:0;background:var(--desk);color:var(--ink);font:14px/1.4 var(--ui);overflow:hidden;overscroll-behavior:none;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit}
+button:focus-visible,textarea:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+#app{position:relative;height:100%;overflow:hidden}
+#stage{position:absolute;inset:0;touch-action:none;background:var(--desk);cursor:crosshair;overflow:hidden}
+body[data-tool="hand"] #stage{cursor:grab}
+body[data-tool="text"] #stage{cursor:text}
+#stage canvas{position:absolute;left:0;top:0;width:100%;height:100%}
+#live,#paper{pointer-events:none}
+#imgs{position:absolute;left:0;top:0;transform-origin:0 0;pointer-events:none}
+.pimg{position:absolute;overflow:hidden}
+.pimg img{position:absolute;display:block;max-width:none;-webkit-user-drag:none;user-select:none}
+.ibox{position:absolute;pointer-events:none;display:none;outline:calc(1.5px * var(--inv)) dashed var(--sel);outline-offset:0}
+body[data-tool="lasso"] .ibox,body[data-tool="text"] .ibox,body[data-tool="hand"] .ibox,.ibox.fresh{display:block}
+.ibar{position:absolute;left:0;bottom:100%;display:flex;gap:2px;padding-bottom:5px;transform-origin:0 100%;transform:scale(var(--inv));pointer-events:auto;white-space:nowrap}
+.ibar button,.ibar span{height:30px;min-width:30px;display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--chrome);color:var(--ink);border-radius:7px;font:500 12.5px/1 var(--ui);cursor:pointer;padding:0 8px;touch-action:none;box-shadow:var(--shadow)}
+.ibar .imove{cursor:grab}
+.igrip{position:absolute;right:0;bottom:0;width:30px;height:30px;transform-origin:100% 100%;transform:scale(var(--inv)) translate(40%,40%);pointer-events:auto;touch-action:none;cursor:nwse-resize;border-radius:50%;background:var(--chrome);border:2px solid var(--sel);box-shadow:var(--shadow)}
+.card.wide{width:960px}
+.viewimg{display:block;max-width:100%;max-height:70vh;margin:0 auto 12px;border-radius:8px;-webkit-user-select:auto;user-select:auto;-webkit-touch-callout:default}
+#world{position:absolute;left:0;top:0;transform-origin:0 0;pointer-events:none;--inv:1}
+
+/* page header + resize grip, counter-scaled to stay the same size on screen */
+.hdr{position:absolute;transform-origin:0 0;transform:scale(var(--inv)) translateY(calc(-100% - 8px));display:flex;align-items:center;gap:2px;white-space:nowrap;pointer-events:auto}
+.grab{display:flex;align-items:center;gap:8px;height:32px;padding:0 10px 0 6px;border-radius:7px;color:var(--muted);font:500 11px/1 var(--mono);letter-spacing:.07em;text-transform:uppercase;cursor:grab;touch-action:none}
+.grab svg{opacity:.7}
+.grab b{color:var(--ink);font-weight:500}
+.grab:hover,.grab.drag{background:var(--chrome);box-shadow:var(--shadow)}
+.hbtn{height:32px;display:flex;align-items:center;gap:6px;border:1px solid transparent;background:transparent;color:var(--muted);border-radius:7px;font:500 12.5px/1 var(--ui);padding:0 9px;cursor:pointer}
+.hbtn:hover{background:var(--chrome);border-color:var(--line);color:var(--ink)}
+.grip{position:absolute;width:30px;height:30px;transform-origin:0 0;transform:scale(var(--inv)) translate(-40%,-40%);pointer-events:auto;touch-action:none;cursor:nwse-resize;display:grid;place-items:center}
+.grip::after{content:"";width:11px;height:11px;border-right:2px solid var(--rule-strong);border-bottom:2px solid var(--rule-strong);border-radius:0 0 3px 0}
+.grip:hover::after{border-color:var(--accent)}
+
+/* text blocks */
+.tb{position:absolute;pointer-events:none}
+.tb textarea{display:block;width:100%;margin:0;border:1px dashed transparent;background:transparent;color:var(--paper-ink);font-family:var(--serif);line-height:1.512;padding:4px 6px;resize:none;overflow:hidden;outline:none;border-radius:4px;-webkit-user-select:text;user-select:text;min-height:2em;color-scheme:light}
+body[data-tool="text"] .tb{pointer-events:auto}
+body[data-tool="text"] .tb textarea{border-color:var(--rule-strong)}
+.tb textarea:focus{border-style:solid;border-color:var(--sel);background:rgba(43,63,196,.035)}
+.tbar{position:absolute;left:0;bottom:100%;display:none;gap:2px;padding-bottom:4px;transform-origin:0 100%;transform:scale(var(--inv))}
+body[data-tool="text"] .tbar{display:flex}
+.tbar button,.tbar span{height:28px;min-width:28px;display:grid;place-items:center;border:1px solid var(--line);background:var(--chrome);color:var(--ink);border-radius:6px;font:500 12px/1 var(--mono);cursor:pointer;padding:0 6px;touch-action:none}
+.tbar .tmove{cursor:grab}
+
+/* top bar */
+.top{position:absolute;left:16px;right:16px;top:12px;display:flex;align-items:flex-start;gap:10px;pointer-events:none;z-index:5}
+.top>*{pointer-events:auto}
+.brand{flex:none;display:flex;align-items:center;gap:8px;padding:8px 12px 8px 8px;background:var(--chrome);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);cursor:pointer;text-align:left;max-width:min(320px,60vw)}
+.brand:hover{background:var(--chrome-2)}
+.brand .back{flex:none;color:var(--muted);display:grid;place-items:center}
+.brand .bcol{display:flex;flex-direction:column;gap:5px;min-width:0}
+.status span{overflow:hidden;text-overflow:ellipsis;min-width:0}
+.word{font:800 23px/1 var(--display);letter-spacing:.07em;display:flex;gap:.28em;align-items:flex-end}
+.word .out{position:relative;color:var(--ink)}
+.word .out svg{position:absolute;left:-2px;right:-3px;bottom:-5px;width:calc(100% + 5px);height:8px;overflow:visible}
+.status{font:500 10px/1 var(--mono);letter-spacing:.06em;color:var(--muted);text-transform:uppercase;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.status i{width:6px;height:6px;border-radius:50%;background:var(--ok);flex:none}
+.status.busy i{background:var(--muted)}
+.dock{flex:1 1 auto;min-width:0;display:flex;justify-content:center}
+.dock-in{display:flex;align-items:center;gap:3px;padding:5px;background:var(--chrome);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);overflow-x:auto;max-width:100%;scrollbar-width:none}
+.dock-in::-webkit-scrollbar{display:none}
+.tbtn{width:44px;height:44px;flex:none;display:grid;place-items:center;border:0;background:transparent;color:var(--ink);border-radius:8px;cursor:pointer}
+.tbtn:hover{background:var(--chrome-2)}
+.tbtn[aria-pressed="true"]{background:var(--ink);color:var(--chrome)}
+.tbtn:disabled{opacity:.35;cursor:default;background:transparent}
+.sep{width:1px;height:28px;background:var(--line);margin:0 4px;flex:none}
+#opts{display:flex;align-items:center;gap:1px}
+#opts:empty{display:none}
+#opts:empty + .sep{display:none}
+.sw{width:34px;height:44px;flex:none;display:grid;place-items:center;border:0;background:transparent;cursor:pointer;border-radius:8px}
+.sw span{width:22px;height:22px;border-radius:50%;background:var(--c);box-shadow:inset 0 0 0 1px rgba(0,0,0,.14)}
+.sw[aria-pressed="true"] span{outline:2px solid var(--ink);outline-offset:3px}
+.sz span{background:var(--ink);box-shadow:none}
+.sz[aria-pressed="true"]{background:var(--chrome-2)}
+.sz[aria-pressed="true"] span{outline:0}
+.menu-btn{flex:none;width:46px;height:46px;display:grid;place-items:center;background:var(--chrome);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);cursor:pointer}
+
+/* bottom controls */
+.bl{position:absolute;left:16px;bottom:14px;z-index:5;display:flex;gap:8px}
+.addpg{height:46px;padding:0 16px 0 12px;display:flex;align-items:center;gap:8px;background:var(--accent);color:var(--accent-ink);border:0;border-radius:10px;font:600 14px/1 var(--ui);box-shadow:var(--shadow);cursor:pointer}
+.br{position:absolute;right:16px;bottom:14px;z-index:5;display:flex;align-items:center;gap:2px;padding:3px;background:var(--chrome);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow)}
+.br .tbtn{width:40px;height:40px}
+.zl{min-width:62px;height:40px;border:0;background:transparent;border-radius:8px;font:500 12px/1 var(--mono);font-variant-numeric:tabular-nums;cursor:pointer}
+.zl:hover{background:var(--chrome-2)}
+
+/* selection bar */
+#selbar{position:fixed;z-index:6;display:flex;gap:4px;padding:4px;background:var(--chrome);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);white-space:nowrap}
+.sbtn{height:38px;display:flex;align-items:center;gap:7px;padding:0 12px;border:0;border-radius:7px;background:transparent;font:500 13px/1 var(--ui);cursor:pointer;color:var(--ink)}
+.sbtn:hover{background:var(--chrome-2)}
+.sbtn.primary{background:var(--accent);color:var(--accent-ink)}
+.sbtn.danger{color:var(--danger)}
+
+/* page menu popover */
+.pop{position:fixed;z-index:30;width:300px;max-width:calc(100% - 32px);padding:14px;background:var(--chrome);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:14px}
+.lab{font:500 10.5px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.chip{height:36px;padding:0 11px;border:1px solid var(--line);background:transparent;border-radius:8px;font:500 13px/1 var(--ui);cursor:pointer;display:flex;align-items:center;gap:7px}
+.chip:hover{background:var(--chrome-2)}
+.chip[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:var(--chrome)}
+.chip .bgp{width:16px;height:16px;border-radius:3px;background:#fff;border:1px solid var(--rule-strong)}
+.acts{display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--line);padding-top:10px}
+.act{height:40px;display:flex;align-items:center;gap:10px;padding:0 8px;border:0;background:transparent;border-radius:8px;font:500 14px/1 var(--ui);cursor:pointer;text-align:left}
+.act:hover{background:var(--chrome-2)}
+.act.danger{color:var(--danger)}
+.act.confirm{background:var(--danger);color:#fff}
+
+/* sheet */
+#sheet{position:fixed;inset:0;z-index:40;display:grid;place-items:center;padding:16px;background:rgba(10,14,24,.38)}
+.card{width:560px;max-width:100%;max-height:calc(100% - 24px);overflow:auto;background:var(--chrome);color:var(--ink);border:1px solid var(--line);border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.3);padding:22px 22px 18px;-webkit-user-select:text;user-select:text}
+.card h2{margin:0 0 4px;font:800 28px/1.05 var(--display);letter-spacing:.05em;text-transform:uppercase;text-wrap:balance}
+.card h3{margin:0 0 6px;font:600 15px/1.3 var(--ui)}
+.card p{margin:0 0 10px;max-width:62ch;color:var(--ink);line-height:1.55}
+.card .note{color:var(--muted);font-size:13px}
+.card section{padding:14px 0;border-top:1px solid var(--line)}
+.card section:first-of-type{border-top:0}
+.card ol{margin:0 0 8px;padding-left:20px;line-height:1.6}
+.card textarea.big{width:100%;min-height:160px;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--paper-ink);font:16px/1.55 var(--serif);resize:vertical;color-scheme:light}
+.card textarea.code{font:12px/1.4 var(--mono);min-height:90px}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.btn{height:42px;padding:0 16px;border:1px solid var(--line);background:transparent;border-radius:9px;font:500 14px/1 var(--ui);cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.btn:hover{background:var(--chrome-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.danger{border-color:var(--danger);color:var(--danger)}
+.btn.confirm{background:var(--danger);border-color:var(--danger);color:#fff}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13px}
+.kv dt{color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;padding-top:2px}
+.kv dd{margin:0}
+.pill{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:12px;font:500 12px/1 var(--ui);background:var(--chrome-2)}
+.pill i{width:7px;height:7px;border-radius:50%;background:var(--muted)}
+.pill.yes i{background:var(--ok)}
+.pill.no i{background:var(--danger)}
+.file-in{position:relative;overflow:hidden}
+.file-in input{position:absolute;inset:0;opacity:0;cursor:pointer}
+
+#toast{position:fixed;left:50%;bottom:76px;transform:translateX(-50%);z-index:50;max-width:calc(100% - 32px);padding:10px 14px;border-radius:9px;background:var(--ink);color:var(--chrome);font:500 13px/1.3 var(--ui);box-shadow:var(--shadow);pointer-events:none;opacity:0;transition:opacity .18s}
+#toast.show{opacity:1}
+
+/* library */
+#library{position:absolute;inset:0;z-index:20;background:var(--desk);overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:18px 16px 40px}
+.lib-top{max-width:1240px;margin:0 auto 22px;display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px 18px}
+.lib-brand{display:flex;flex-direction:column;gap:8px;margin-right:auto}
+.lib-brand .word{font-size:44px}
+.lib-brand .word .out svg{height:12px;bottom:-8px}
+.lib-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.search{height:44px;width:230px;max-width:100%;padding:0 14px;border:1px solid var(--line);border-radius:10px;background:var(--chrome);color:var(--ink);font:14px var(--ui);-webkit-user-select:text;user-select:text}
+.search::placeholder{color:var(--muted)}
+.lib-body{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:240px minmax(0,1fr);gap:28px;align-items:start}
+.folders{display:flex;flex-direction:column;gap:2px;position:sticky;top:0}
+.flab{font:500 10.5px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:14px 10px 8px}
+.frow{display:flex;align-items:center;border-radius:9px}
+.frow:hover{background:var(--chrome)}
+.frow.on{background:var(--chrome);box-shadow:var(--shadow)}
+.fbtn{flex:1;min-width:0;height:42px;display:flex;align-items:center;gap:10px;padding:0 10px;border:0;background:transparent;font:500 14px/1 var(--ui);cursor:pointer;text-align:left}
+.fbtn .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fbtn .ct{font:500 11.5px/1 var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.fdot{width:10px;height:10px;border-radius:3px;background:var(--c,var(--muted));flex:none}
+.fmore{width:36px;height:36px;border:0;background:transparent;border-radius:8px;display:grid;place-items:center;color:var(--muted);cursor:pointer;flex:none}
+.fmore:hover{background:var(--chrome-2);color:var(--ink)}
+.fadd{height:42px;display:flex;align-items:center;gap:10px;padding:0 10px;border:1px dashed var(--line);border-radius:9px;background:transparent;color:var(--muted);font:500 14px/1 var(--ui);cursor:pointer;margin-top:8px}
+.fadd:hover{color:var(--ink);border-color:var(--muted)}
+.lib-head{display:flex;align-items:baseline;gap:12px;margin:4px 0 16px}
+.lib-head h1{margin:0;font:800 30px/1 var(--display);letter-spacing:.04em;text-transform:uppercase;text-wrap:balance}
+.lib-head span{font:500 12px/1 var(--mono);color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:22px 18px}
+.dcard{display:flex;flex-direction:column;gap:10px;min-width:0}
+.thumb{display:block;width:100%;aspect-ratio:4/3;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#D7DBE1;padding:0;cursor:pointer;box-shadow:var(--shadow);max-width:100%}
+.thumb img{display:block;width:100%;height:100%;object-fit:cover}
+.thumb:hover{border-color:var(--accent)}
+.thumb:empty{display:grid;place-items:center}
+.thumb:empty::after{content:"";width:30%;aspect-ratio:1/1.414;background:#FEFEFC;box-shadow:0 1px 4px rgba(22,30,52,.2)}
+.drow{display:flex;align-items:flex-start;gap:4px}
+.dinfo{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+.dname{border:0;background:transparent;padding:0;font:600 15px/1.25 var(--ui);text-align:left;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dsub{font:400 11.5px/1.3 var(--mono);color:var(--muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.dsub .fdot{width:8px;height:8px}
+.empty{grid-column:1/-1;padding:40px 20px;border:1px dashed var(--line);border-radius:12px;text-align:center;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:14px}
+.newcard{aspect-ratio:4/3;border:1.5px dashed var(--line);border-radius:10px;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--muted);font:500 14px/1 var(--ui);cursor:pointer;width:100%}
+.newcard:hover{color:var(--accent);border-color:var(--accent)}
+.field{width:100%;height:46px;padding:0 14px;border:1px solid var(--line);border-radius:9px;background:var(--paper);color:var(--paper-ink);font:16px var(--ui);color-scheme:light;-webkit-user-select:text;user-select:text}
+.card .lab{margin-top:14px}
+@media (max-width:760px){
+  .lib-body{grid-template-columns:minmax(0,1fr);gap:16px}
+  .folders{position:static;flex-direction:row;overflow-x:auto;gap:6px;padding-bottom:4px;scrollbar-width:none}
+  .folders .flab{display:none}
+  .frow{flex:none;border:1px solid var(--line)}
+  .fbtn{height:38px}
+  .fadd{margin-top:0;flex:none;height:40px}
+  .lib-brand .word{font-size:34px}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:18px 12px}
+}
+@media (max-width:760px){
+  .brand{padding:8px 10px 8px 6px}
+  .word{font-size:19px}
+  .addpg span{display:none}
+  .addpg{padding:0 13px}
+}
+@media (max-width:560px){
+  .top{flex-wrap:wrap}
+  .dock{order:3;flex-basis:100%;justify-content:flex-start}
+  .brand{margin-right:auto}
+}
+@media (prefers-reduced-motion:reduce){#toast{transition:none}}
+</style>
+
+<div id="app">
+  <div id="stage">
+    <canvas id="paper"></canvas>
+    <div id="imgs"></div>
+    <canvas id="cv"></canvas>
+    <canvas id="live"></canvas>
+    <div id="world"></div>
+  </div>
+
+  <div class="top">
+    <button class="brand" id="toLib" title="Zpět do knihovny" aria-label="Zpět do knihovny">
+      <span class="back"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></span>
+      <span class="bcol">
+        <span class="word"><span>WRITE</span><span class="out">OUT<svg viewBox="0 0 60 8" preserveAspectRatio="none" aria-hidden="true"><path d="M1 5.5C12 2.5 24 6.8 36 3.6 44 1.8 52 3 59 4.2" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linecap="round"/></svg></span></span>
+        <span class="status" id="status"><i></i><span id="statusText">Jen v tomto zařízení</span></span>
+      </span>
+    </button>
+    <div class="dock"><div class="dock-in" id="dock">
+      <button class="tbtn" data-tool="pen" title="Pero (P)" aria-label="Pero"></button>
+      <button class="tbtn" data-tool="marker" title="Zvýrazňovač (M)" aria-label="Zvýrazňovač"></button>
+      <button class="tbtn" data-tool="eraser" title="Guma (E)" aria-label="Guma"></button>
+      <button class="tbtn" data-tool="lasso" title="Laso, výběr rukopisu (L)" aria-label="Laso"></button>
+      <button class="tbtn" data-tool="text" title="Text (T)" aria-label="Text"></button>
+      <button class="tbtn" data-tool="hand" title="Posun plátna (H)" aria-label="Posun plátna"></button>
+      <button class="tbtn" id="imgBtn" title="Vložit fotku nebo obrázek" aria-label="Vložit fotku nebo obrázek"></button>
+      <input type="file" id="imgFile" accept="image/*" multiple tabindex="-1" aria-hidden="true" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none">
+      <span class="sep"></span>
+      <div id="opts"></div>
+      <span class="sep"></span>
+      <button class="tbtn" id="undo" title="Zpět (Ctrl+Z)" aria-label="Zpět"></button>
+      <button class="tbtn" id="redo" title="Znovu (Ctrl+Shift+Z)" aria-label="Znovu"></button>
+    </div></div>
+    <button class="menu-btn" id="menuBtn" title="Soukromí, záloha a nastavení" aria-label="Soukromí, záloha a nastavení"></button>
+  </div>
+
+  <div class="bl"><button class="addpg" id="addPage"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span>Nový list</span></button></div>
+  <div class="br">
+    <button class="tbtn" id="zoomOut" aria-label="Oddálit"></button>
+    <button class="zl" id="zoomLabel" title="Zpět na 100 %">100 %</button>
+    <button class="tbtn" id="zoomIn" aria-label="Přiblížit"></button>
+    <button class="tbtn" id="fit" title="Ukázat všechny listy" aria-label="Ukázat všechny listy"></button>
+  </div>
+
+  <div id="library" hidden>
+    <header class="lib-top">
+      <div class="lib-brand">
+        <div class="word"><span>WRITE</span><span class="out">OUT<svg viewBox="0 0 60 8" preserveAspectRatio="none" aria-hidden="true"><path d="M1 5.5C12 2.5 24 6.8 36 3.6 44 1.8 52 3 59 4.2" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linecap="round"/></svg></span></div>
+        <div class="status"><i></i><span>Jen v tomto zařízení · nikam se neodesílá</span></div>
+      </div>
+      <div class="lib-tools">
+        <input class="search" id="search" type="search" placeholder="Hledat dokument" aria-label="Hledat dokument" autocomplete="off" spellcheck="false">
+        <button class="menu-btn" id="libMenu" title="Soukromí, záloha a nastavení" aria-label="Soukromí, záloha a nastavení"></button>
+        <button class="addpg" id="newDoc"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Nový dokument</button>
+      </div>
+    </header>
+    <div class="lib-body">
+      <nav class="folders" id="folders" aria-label="Složky"></nav>
+      <main>
+        <div class="lib-head"><h1 id="libTitle">Všechny dokumenty</h1><span id="libCount"></span></div>
+        <div class="grid" id="docGrid"></div>
+      </main>
+    </div>
+  </div>
+
+  <div id="selbar" hidden>
+    <button class="sbtn primary" id="selConvert"></button>
+    <button class="sbtn danger" id="selDelete"></button>
+    <button class="sbtn" id="selClear">Zrušit výběr</button>
+  </div>
+  <div id="pagemenu" class="pop" hidden></div>
+  <div id="sheet" hidden></div>
+  <div id="toast" role="status" aria-live="polite"></div>
+</div>
+
+<script>
+(()=>{
+'use strict';
+const $=s=>document.querySelector(s);
+const ICON={
+  pen:'<path d="M4 20l1.1-4.3L15.6 5.2a2 2 0 012.8 0l.4.4a2 2 0 010 2.8L8.3 18.9 4 20z"/><path d="M13.8 7l3.2 3.2"/>',
+  marker:'<path d="M9.2 14.8L6.5 20h5.2l1.3-1.9"/><path d="M9 15l7-8.6a2 2 0 012.9-.2l.9.9a2 2 0 01-.2 2.9L11 16.5z"/>',
+  eraser:'<path d="M16.4 4.6l3 3a1.6 1.6 0 010 2.3L11.2 18H6.8l-2.4-2.4a1.6 1.6 0 010-2.3L14.1 4.6a1.6 1.6 0 012.3 0z"/><path d="M9.2 9.5l5.3 5.3M11.2 18H20"/>',
+  lasso:'<ellipse cx="12" cy="10" rx="8" ry="5" stroke-dasharray="2.6 2.4"/><path d="M7.6 14.2c-1.4 1.6-.8 4 1.4 4 1.3 0 1.8 1 1.2 2.2"/>',
+  text:'<path d="M5 7V5h14v2M12 5v14M9 19h6"/>',
+  hand:'<path d="M8 13V6.5a1.5 1.5 0 013 0V11M11 11V5a1.5 1.5 0 013 0v6M14 11V6.5a1.5 1.5 0 013 0V14c0 3.6-2.4 6.5-5.8 6.5-2.4 0-3.8-1.1-5-3L4.6 14a1.5 1.5 0 012.5-1.7L8 13.6"/>',
+  undo:'<path d="M9 6l-4.5 4.5L9 15"/><path d="M4.5 10.5H14a5 5 0 010 10h-3"/>',
+  redo:'<path d="M15 6l4.5 4.5L15 15"/><path d="M19.5 10.5H10a5 5 0 000 10h3"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>', minus:'<path d="M5 12h14"/>',
+  fit:'<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
+  more:'<circle cx="5.5" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="18.5" cy="12" r="1.3" fill="currentColor" stroke="none"/>',
+  lock:'<rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 018 0v2.5"/>',
+  grip:'<circle cx="9" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="9" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="9" cy="18" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="18" r="1.2" fill="currentColor" stroke="none"/>',
+  convert:'<path d="M3.5 15c1.6-4.8 2.6-7 3.6-7 1.2 0 .8 4.5 2 4.5 1 0 1.6-2.6 2.6-2.6"/><path d="M14 8h6.5M17.2 8v9"/>',
+  trash:'<path d="M5 7h14M10 7V5h4v2M7 7l1 12.5h8L17 7"/>',
+  copy:'<rect x="8.5" y="8.5" width="11" height="11" rx="2"/><path d="M15.5 8.5V6a1.5 1.5 0 00-1.5-1.5H6A1.5 1.5 0 004.5 6v8A1.5 1.5 0 006 15.5h2.5"/>',
+  x:'<path d="M7 7l10 10M17 7L7 17"/>',
+  image:'<rect x="3.5" y="5" width="17" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M20.5 16l-4.5-4.5L7 19"/>',
+  eye:'<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/>'
+};
+const svg=(n,s=22,w=1.7)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[n]}</svg>`;
+
+const MM=96/25.4;
+const FORMATS=[
+  {k:'a4p',w:794,h:1123,label:'A4'},
+  {k:'a4l',w:1123,h:794,label:'A4 na šířku'},
+  {k:'a5p',w:559,h:794,label:'A5'},
+  {k:'sq', w:900,h:900,label:'Čtverec'},
+  {k:'wide',w:1600,h:900,label:'Široký 16:9'}
+];
+const BGS={blank:'Čistý',lines:'Linky',grid:'Mřížka',dots:'Tečky'};
+const PEN_COLORS=['#1B1F27','#2B3FC4','#C0312B','#23795A'];
+const MARK_COLORS=['#F5D23A','#86E0A4','#F6A0C3','#8CC7F6'];
+const PEN_SIZES=[1.5,2.6,4.4], MARK_SIZES=[12,18,28], ERASER_SIZES=[10,22,44];
+
+const stage=$('#stage'), cv=$('#cv'), live=$('#live'), world=$('#world');
+const paper=$('#paper'), imgsEl=$('#imgs');
+const ctx=cv.getContext('2d'), lctx=live.getContext('2d'), pctx=paper.getContext('2d');
+let dpr=1,W=0,H=0,rect={left:0,top:0};
+let doc=null, cam=null;
+let undoStack=[], redoStack=[];
+let sel=new Set(), selOff={x:0,y:0};
+let action=null; const ptrs=new Map();
+let spaceDown=false, lastPen=0;
+const uid=()=>Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-4);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const pad2=n=>String(n).padStart(2,'0');
+
+/* ---------- prefs (per device) ---------- */
+let prefs={tool:'pen',ts:{pen:{c:0,s:1},marker:{c:0,s:1},eraser:{s:1}},penSeen:false,finger:'auto'};
+try{const p=JSON.parse(localStorage.getItem('writeout.prefs')||'null'); if(p) prefs=Object.assign(prefs,p);}catch(e){}
+function savePrefs(){try{localStorage.setItem('writeout.prefs',JSON.stringify(prefs));}catch(e){}}
+const fingerPans=()=>prefs.finger==='pan'||(prefs.finger==='auto'&&prefs.penSeen);
+
+/* ---------- colors from tokens ---------- */
+let C={};
+function readColors(){
+  const cs=getComputedStyle(document.documentElement), g=n=>cs.getPropertyValue(n).trim();
+  C={deskDot:g('--desk-dot'),paper:g('--paper'),rule:g('--rule'),margin:g('--margin'),sel:g('--sel'),selSoft:g('--sel-soft'),shadow:g('--page-shadow'),muted:g('--muted')};
+}
+readColors();
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>{readColors();requestRender();});
+new MutationObserver(()=>{readColors();requestRender();}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+/* ---------- storage: IndexedDB in this browser only ---------- */
+let dbP=null;
+function openDB(){
+  if(dbP) return dbP;
+  dbP=new Promise((res,rej)=>{
+    try{const r=indexedDB.open('writeout',1);
+      r.onupgradeneeded=()=>r.result.createObjectStore('kv');
+      r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error);}catch(e){rej(e);}
+  });
+  return dbP;
+}
+async function idbGet(k){const db=await openDB();return new Promise((res,rej)=>{const q=db.transaction('kv','readonly').objectStore('kv').get(k);q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error);});}
+async function idbSet(k,v){const db=await openDB();return new Promise((res,rej)=>{const tx=db.transaction('kv','readwrite');tx.objectStore('kv').put(v,k);tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error);});}
+async function idbDel(k){const db=await openDB();return new Promise((res,rej)=>{const tx=db.transaction('kv','readwrite');tx.objectStore('kv').delete(k);tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error);});}
+/* IndexedDB first, localStorage as fallback */
+async function kvGet(k){
+  try{const v=await idbGet(k);if(v!==undefined&&v!==null)return v;}catch(e){}
+  try{const s=localStorage.getItem('writeout.'+k);return s?JSON.parse(s):null;}catch(e){return null;}
+}
+async function kvSet(k,v){
+  try{await idbSet(k,v);return true;}catch(e){}
+  try{localStorage.setItem('writeout.'+k,JSON.stringify(v));return true;}catch(e){return false;}
+}
+async function kvDel(k){try{await idbDel(k);}catch(e){}try{localStorage.removeItem('writeout.'+k);}catch(e){}}
+
+/* library = folders + document list; each document's canvas lives under doc:<id> */
+let lib={v:1,folders:[],docs:[]}, currentId=null;
+const FOLDER_COLORS=['#2B3FC4','#C0312B','#23795A','#C98A12','#7A4CC2','#5B6475'];
+const entryById=id=>lib.docs.find(d=>d.id===id);
+const folderById=id=>lib.folders.find(f=>f.id===id);
+function serial(){return {v:1,pages:doc.pages,strokes:doc.strokes,images:doc.images||[],texts:doc.texts.map(t=>{const o={...t};delete o._new;return o;}),cam:{...cam},savedAt:Date.now()};}
+let saveT=0, contentDirty=false;
+function setStatus(txt,busy){$('#statusText').textContent=txt;$('#status').classList.toggle('busy',!!busy);}
+function docPath(){const e=entryById(currentId);if(!e)return '';const f=folderById(e.folderId);return (f?f.name+' / ':'')+e.name;}
+function saveSoon(kind){if(!doc)return;if(kind!=='cam'){contentDirty=true;setStatus('Ukládám…',true);}clearTimeout(saveT);saveT=setTimeout(saveNow,450);}
+async function saveNow(){
+  clearTimeout(saveT);
+  if(!doc||!currentId) return;
+  const id=currentId, data=serial(), e=entryById(id);
+  const ok=await kvSet('doc:'+id,data);
+  if(e){
+    if(contentDirty){e.updated=Date.now();try{e.thumb=makeThumb();}catch(_){}}
+    e.pages=doc.pages.length;
+  }
+  contentDirty=false;
+  const ok2=await kvSet('lib',lib);
+  if(currentId===id) setStatus(ok&&ok2?docPath():'Nelze ukládat, udělej zálohu',!(ok&&ok2));
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')saveNow();});
+addEventListener('pagehide',()=>saveNow());
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch(e){}
+
+/* small preview image of a document for the library */
+function makeThumb(){
+  const TW=360,TH=270,c=document.createElement('canvas');c.width=TW;c.height=TH;
+  const g=c.getContext('2d');g.fillStyle='#D7DBE1';g.fillRect(0,0,TW,TH);
+  if(!doc.pages.length) return c.toDataURL('image/jpeg',.8);
+  const first=doc.pages[0];
+  let x0=first.x,y0=first.y,x1=first.x+first.w,y1=first.y+first.h;
+  for(const p of doc.pages.slice(1,4)){x0=Math.min(x0,p.x);y0=Math.min(y0,p.y);x1=Math.max(x1,p.x+p.w);y1=Math.max(y1,p.y+p.h);}
+  const pad=24,s=Math.min((TW-pad*2)/(x1-x0),(TH-pad*2)/(y1-y0));
+  const ox=(TW-(x1-x0)*s)/2-x0*s,oy=pad-y0*s;
+  const byPage=new Map();for(const st of doc.strokes){let a=byPage.get(st.pageId);if(!a)byPage.set(st.pageId,a=[]);a.push(st);}
+  for(const p of doc.pages){
+    g.setTransform(s,0,0,s,ox+p.x*s,oy+p.y*s);
+    g.save();g.shadowColor='rgba(22,30,52,.18)';g.shadowBlur=6;g.shadowOffsetY=1;g.fillStyle='#FEFEFC';g.fillRect(0,0,p.w,p.h);g.restore();
+    g.save();g.beginPath();g.rect(0,0,p.w,p.h);g.clip();
+    if(p.bg==='lines'){g.strokeStyle='#DCE2EC';g.lineWidth=1.5/s*.6;g.beginPath();for(let y=8*MM*2;y<p.h;y+=8*MM){g.moveTo(0,y);g.lineTo(p.w,y);}g.stroke();}
+    for(const im of (doc.images||[]).filter(i=>i.pageId===p.id)){const el=imgEls.get(im.id);if(el&&el.complete&&el.naturalWidth){try{g.drawImage(el,im.x,im.y,im.w,im.h);}catch(_){}}}
+    for(const st of byPage.get(p.id)||[]) drawStroke(g,st,null);
+    for(const t of doc.texts.filter(t=>t.pageId===p.id)){
+      g.fillStyle='#1B1F27';g.font=`${t.fs}px Literata, Georgia, serif`;
+      const lh=t.fs*1.5;let y=t.y+4+t.fs;
+      for(const line of (t.text||'').split('\n')){
+        const words=line.split(' ');let cur='';
+        for(const w of words){const test=cur?cur+' '+w:w;if(g.measureText(test).width>t.w-12&&cur){g.fillText(cur,t.x+6,y);y+=lh;cur=w;}else cur=test;}
+        g.fillText(cur,t.x+6,y);y+=lh;if(y>p.h)break;
+      }
+    }
+    g.restore();
+  }
+  return c.toDataURL('image/jpeg',.8);
+}
+
+/* ---------- sample notebook for the first open ---------- */
+function blankDoc(fk,bg){const f=FORMATS.find(x=>x.k===fk)||FORMATS[0];return {v:1,pages:[{id:uid(),x:0,y:0,w:f.w,h:f.h,bg:bg||'lines'}],strokes:[],texts:[],images:[],cam:null};}
+function seed(){
+  const p1={id:uid(),x:0,y:0,w:794,h:1123,bg:'lines'};
+  const p2={id:uid(),x:874,y:0,w:794,h:1123,bg:'grid'};
+  const p3={id:uid(),x:1748,y:0,w:559,h:794,bg:'dots'};
+  return {v:1,pages:[p1,p2,p3],strokes:[],images:[],texts:[
+    {id:uid(),pageId:p1.id,x:74,y:33,w:660,fs:20,text:
+'Vítej ve WRITE OUT. (Ukázkový text, klidně ho smaž.)\n\nPiš perem přímo na list. Dvěma prsty posouváš a přibližuješ plátno.\n\nPřevod na text: vyber rukopis lasem a klepni na Převést na text. Nebo klepni na Převést nahoře u štítku listu.\n\nListy přesouváš za štítek LIST, velikost měníš za pravý dolní roh. Formát a pozadí najdeš pod třemi tečkami.\n\nSložky a další dokumenty jsou v knihovně: klepni vlevo nahoře na WRITE OUT.\n\nVšechno se ukládá jen v tomto zařízení.'},
+    {id:uid(),pageId:p2.id,x:40,y:36,w:520,fs:18,text:'Mřížka 5 mm, na schémata a skici. (Ukázka)'},
+    {id:uid(),pageId:p3.id,x:34,y:36,w:420,fs:18,text:'Menší list A5 s tečkami. (Ukázka)'}
+  ],cam:null};
+}
+
+/* ---------- geometry helpers ---------- */
+const pageById=id=>doc.pages.find(p=>p.id===id);
+const textById=id=>doc.texts.find(t=>t.id===id);
+function pageAt(x,y){for(let i=doc.pages.length-1;i>=0;i--){const p=doc.pages[i];if(x>=p.x&&y>=p.y&&x<=p.x+p.w&&y<=p.y+p.h)return p;}return null;}
+const toWorld=(sx,sy)=>({x:(sx-cam.x)/cam.z,y:(sy-cam.y)/cam.z});
+const local=e=>({x:e.clientX-rect.left,y:e.clientY-rect.top});
+const bbCache=new WeakMap();
+function bboxOf(st){
+  let b=bbCache.get(st); if(b) return b;
+  let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+  for(const q of st.pts){if(q[0]<x0)x0=q[0];if(q[1]<y0)y0=q[1];if(q[0]>x1)x1=q[0];if(q[1]>y1)y1=q[1];}
+  const r=st.s/2; b={x:x0-r,y:y0-r,w:x1-x0+2*r,h:y1-y0+2*r}; bbCache.set(st,b); return b;
+}
+function fmtLabel(p){
+  const f=FORMATS.find(f=>f.w===p.w&&f.h===p.h);
+  return f?f.label:`${Math.round(p.w/MM)} × ${Math.round(p.h/MM)} mm`;
+}
+
+/* ---------- stroke geometry ---------- */
+function smooth(pts){
+  if(pts.length<3) return pts;
+  const o=[pts[0]];
+  for(let i=1;i<pts.length-1;i++){const a=pts[i-1],b=pts[i],c=pts[i+1];o.push([(a[0]+2*b[0]+c[0])/4,(a[1]+2*b[1]+c[1])/4,(a[2]+2*b[2]+c[2])/4]);}
+  o.push(pts[pts.length-1]); return o;
+}
+function buildPath(st){
+  const pts=st.k==='marker'?st.pts:smooth(st.pts), n=pts.length;
+  const body=new Path2D(), caps=new Path2D();
+  if(!n) return {body,caps};
+  if(st.k==='marker'){
+    body.moveTo(pts[0][0],pts[0][1]);
+    if(n===1) body.lineTo(pts[0][0]+.01,pts[0][1]);
+    for(let i=1;i<n;i++) body.lineTo(pts[i][0],pts[i][1]);
+    return {body,caps};
+  }
+  const wOf=q=>st.s*(0.42+0.85*q[2])/2;
+  if(n===1){caps.arc(pts[0][0],pts[0][1],wOf(pts[0]),0,Math.PI*2);return {body,caps};}
+  const L=[],R=[];
+  for(let i=0;i<n;i++){
+    const a=pts[Math.max(0,i-1)],b=pts[Math.min(n-1,i+1)];
+    const dx=b[0]-a[0],dy=b[1]-a[1],len=Math.hypot(dx,dy)||1;
+    const nx=-dy/len,ny=dx/len,w=wOf(pts[i]);
+    L.push([pts[i][0]+nx*w,pts[i][1]+ny*w]);R.push([pts[i][0]-nx*w,pts[i][1]-ny*w]);
+  }
+  body.moveTo(L[0][0],L[0][1]);
+  for(let i=1;i<n;i++) body.lineTo(L[i][0],L[i][1]);
+  for(let i=n-1;i>=0;i--) body.lineTo(R[i][0],R[i][1]);
+  body.closePath();
+  const f=pts[0],l=pts[n-1];
+  caps.moveTo(f[0]+wOf(f),f[1]);caps.arc(f[0],f[1],wOf(f),0,Math.PI*2);
+  caps.moveTo(l[0]+wOf(l),l[1]);caps.arc(l[0],l[1],wOf(l),0,Math.PI*2);
+  return {body,caps};
+}
+const pathCache=new WeakMap();
+function getPath(st,nocache){
+  if(!nocache){const c=pathCache.get(st);if(c)return c;}
+  const P=buildPath(st); if(!nocache) pathCache.set(st,P); return P;
+}
+function drawStroke(c,st,off,nocache){
+  const P=getPath(st,nocache);
+  if(off){c.save();c.translate(off.x,off.y);}
+  if(st.k==='marker'){
+    c.save();c.globalCompositeOperation='multiply';c.globalAlpha=.6;
+    c.strokeStyle=st.c;c.lineWidth=st.s;c.lineCap='round';c.lineJoin='round';c.stroke(P.body);c.restore();
+  }else{c.fillStyle=st.c;c.fill(P.body);c.fill(P.caps);}
+  if(off) c.restore();
+}
+
+/* ---------- rendering ---------- */
+let raf=0, liveRaf=0;
+function requestRender(){if(!raf) raf=requestAnimationFrame(()=>{raf=0;render();});}
+function scheduleLive(){if(!liveRaf) liveRaf=requestAnimationFrame(drawLive);}
+function render(){
+  if(!doc||!cam) return;
+  ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,cv.width,cv.height);
+  pctx.setTransform(1,0,0,1,0,0);pctx.clearRect(0,0,paper.width,paper.height);
+  const z=cam.z, g=48;
+  if(z*g>=14){
+    pctx.fillStyle=C.deskDot;
+    const x0=Math.floor(-cam.x/z/g)*g, y0=Math.floor(-cam.y/z/g)*g, x1=(W-cam.x)/z, y1=(H-cam.y)/z, r=1.6*dpr;
+    for(let x=x0;x<=x1;x+=g) for(let y=y0;y<=y1;y+=g) pctx.fillRect((x*z+cam.x)*dpr-r/2,(y*z+cam.y)*dpr-r/2,r,r);
+  }
+  const map=new Map();
+  for(const s of doc.strokes){let a=map.get(s.pageId);if(!a)map.set(s.pageId,a=[]);a.push(s);}
+  const vx0=-cam.x/z,vy0=-cam.y/z,vx1=(W-cam.x)/z,vy1=(H-cam.y)/z;
+  for(const p of doc.pages){
+    if(p.x>vx1||p.y>vy1||p.x+p.w<vx0||p.y+p.h<vy0) continue;
+    drawPage(p,map.get(p.id)||[]);
+  }
+  if(sel.size){
+    const b=selBBox();
+    if(b){ctx.setTransform(dpr,0,0,dpr,0,0);
+      const sx=(b.x+selOff.x)*z+cam.x-6, sy=(b.y+selOff.y)*z+cam.y-6, sw=b.w*z+12, sh=b.h*z+12;
+      ctx.fillStyle=C.selSoft;ctx.fillRect(sx,sy,sw,sh);
+      ctx.strokeStyle=C.sel;ctx.lineWidth=1.5;ctx.setLineDash([6,4]);ctx.strokeRect(sx,sy,sw,sh);ctx.setLineDash([]);}
+  }
+  positionSelbar();
+}
+function drawPage(p,list){
+  const z=cam.z,s=dpr*z;
+  pctx.setTransform(s,0,0,s,dpr*(cam.x+p.x*z),dpr*(cam.y+p.y*z));
+  pctx.save();pctx.shadowColor=C.shadow;pctx.shadowBlur=16*dpr;pctx.shadowOffsetY=3*dpr;pctx.fillStyle=C.paper;pctx.fillRect(0,0,p.w,p.h);pctx.restore();
+  pctx.save();pctx.beginPath();pctx.rect(0,0,p.w,p.h);pctx.clip();
+  drawBg(pctx,p,z);pctx.restore();
+  ctx.setTransform(s,0,0,s,dpr*(cam.x+p.x*z),dpr*(cam.y+p.y*z));
+  ctx.save();ctx.beginPath();ctx.rect(0,0,p.w,p.h);ctx.clip();
+  for(const st of list) drawStroke(ctx,st,sel.has(st.id)&&(selOff.x||selOff.y)?selOff:null);
+  ctx.restore();
+}
+function drawBg(ctx,p,z){
+  if(p.bg==='blank') return;
+  const lw=Math.max(1,.8/z);
+  if(p.bg==='lines'){
+    const sp=8*MM; if(sp*z<4) return;
+    ctx.beginPath();
+    for(let y=sp*2;y<p.h-sp*.6;y+=sp){ctx.moveTo(0,y);ctx.lineTo(p.w,y);}
+    ctx.strokeStyle=C.rule;ctx.lineWidth=lw;ctx.stroke();
+    ctx.beginPath();ctx.moveTo(sp*2.1,0);ctx.lineTo(sp*2.1,p.h);ctx.strokeStyle=C.margin;ctx.stroke();
+  }else if(p.bg==='grid'){
+    const sp=5*MM; if(sp*z<4) return;
+    ctx.beginPath();
+    for(let y=sp;y<p.h;y+=sp){ctx.moveTo(0,y);ctx.lineTo(p.w,y);}
+    for(let x=sp;x<p.w;x+=sp){ctx.moveTo(x,0);ctx.lineTo(x,p.h);}
+    ctx.strokeStyle=C.rule;ctx.lineWidth=lw*.8;ctx.stroke();
+  }else if(p.bg==='dots'){
+    const sp=5*MM; if(sp*z<5) return;
+    ctx.fillStyle=C.rule; const r=Math.max(1.1,.9/z);
+    for(let y=sp;y<p.h;y+=sp) for(let x=sp;x<p.w;x+=sp) ctx.fillRect(x-r,y-r,r*2,r*2);
+  }
+}
+function drawLive(){
+  liveRaf=0;
+  lctx.setTransform(1,0,0,1,0,0);lctx.clearRect(0,0,live.width,live.height);
+  if(!action) return;
+  const z=cam.z;
+  if(action.type==='draw'){
+    const p=action.page;
+    lctx.setTransform(dpr*z,0,0,dpr*z,dpr*(cam.x+p.x*z),dpr*(cam.y+p.y*z));
+    lctx.save();lctx.beginPath();lctx.rect(0,0,p.w,p.h);lctx.clip();
+    if(action.st.k==='marker'){lctx.globalAlpha=.55;}
+    drawStroke(lctx,action.st,null,true);
+    lctx.restore();
+  }else if(action.type==='lasso'){
+    const pts=action.pts; if(pts.length<2) return;
+    lctx.setTransform(dpr,0,0,dpr,0,0);
+    lctx.beginPath();
+    pts.forEach((q,i)=>{const sx=q[0]*z+cam.x,sy=q[1]*z+cam.y;i?lctx.lineTo(sx,sy):lctx.moveTo(sx,sy);});
+    lctx.closePath();lctx.fillStyle=C.selSoft;lctx.fill();
+    lctx.strokeStyle=C.sel;lctx.lineWidth=1.5;lctx.setLineDash([5,4]);lctx.stroke();lctx.setLineDash([]);
+  }else if(action.type==='erase'&&action.cur){
+    lctx.setTransform(dpr,0,0,dpr,0,0);
+    lctx.beginPath();lctx.arc(action.cur.x,action.cur.y,ERASER_SIZES[prefs.ts.eraser.s]/2,0,Math.PI*2);
+    lctx.strokeStyle=C.muted;lctx.lineWidth=1.5;lctx.stroke();
+  }
+}
+function eraserHover(p){
+  lctx.setTransform(1,0,0,1,0,0);lctx.clearRect(0,0,live.width,live.height);
+  if(!p) return;
+  lctx.setTransform(dpr,0,0,dpr,0,0);
+  lctx.beginPath();lctx.arc(p.x,p.y,ERASER_SIZES[prefs.ts.eraser.s]/2,0,Math.PI*2);
+  lctx.strokeStyle=C.muted;lctx.lineWidth=1.5;lctx.stroke();
+}
+
+/* ---------- camera ---------- */
+function applyCam(){
+  world.style.transform=imgsEl.style.transform=`translate(${cam.x}px,${cam.y}px) scale(${cam.z})`;
+  world.style.setProperty('--inv',1/cam.z);
+  $('#zoomLabel').textContent=Math.round(cam.z*100)+' %';
+  requestRender();
+}
+function zoomAt(sx,sy,nz){
+  nz=clamp(nz,.08,5);
+  const wx=(sx-cam.x)/cam.z, wy=(sy-cam.y)/cam.z;
+  cam.z=nz;cam.x=sx-wx*nz;cam.y=sy-wy*nz;applyCam();
+}
+function topInset(){const t=document.querySelector('.top').getBoundingClientRect();return t.bottom-rect.top+44;}
+function fitBox(b){
+  const top=topInset(), bottom=80, side=40;
+  const z=clamp(Math.min((W-side*2)/b.w,(H-top-bottom)/b.h),.08,2);
+  cam.z=z;cam.x=(W-b.w*z)/2-b.x*z;cam.y=top+((H-top-bottom)-b.h*z)/2-b.y*z;applyCam();
+}
+function fitAll(){
+  if(!doc.pages.length) return;
+  let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+  for(const p of doc.pages){x0=Math.min(x0,p.x);y0=Math.min(y0,p.y);x1=Math.max(x1,p.x+p.w);y1=Math.max(y1,p.y+p.h);}
+  fitBox({x:x0,y:y0,w:x1-x0,h:y1-y0});saveSoon("cam");
+}
+function focusPage(p){
+  const z=cam.z;
+  const vis=p.x*z+cam.x>=0&&(p.x+p.w)*z+cam.x<=W&&p.y*z+cam.y>=0;
+  if(vis) return;
+  cam.x=W/2-(p.x+p.w/2)*z; if(p.h*z<H-topInset()) cam.y=topInset()-p.y*z; applyCam();
+}
+
+/* ---------- undo ---------- */
+function snapshot(){return {pages:doc.pages.map(p=>({...p})),strokes:doc.strokes.slice(),texts:doc.texts.map(t=>({...t})),images:(doc.images||[]).map(i=>({...i}))};}
+function pushUndo(){undoStack.push(snapshot());if(undoStack.length>100)undoStack.shift();redoStack=[];updUndo();}
+function restore(s){doc.pages=s.pages;doc.strokes=s.strokes;doc.texts=s.texts;doc.images=s.images||[];clearSel();renderOverlay();requestRender();saveSoon();updUndo();}
+function undo(){if(!undoStack.length)return;redoStack.push(snapshot());restore(undoStack.pop());}
+function redo(){if(!redoStack.length)return;undoStack.push(snapshot());restore(redoStack.pop());}
+function updUndo(){$('#undo').disabled=!undoStack.length;$('#redo').disabled=!redoStack.length;}
+
+/* ---------- overlay: page labels, grips, text blocks ---------- */
+function renderOverlay(){
+  world.textContent='';
+  doc.pages.forEach((p,i)=>{
+    const h=document.createElement('div');h.className='hdr';h.dataset.id=p.id;
+    h.innerHTML=`<span class="grab" title="Přetáhni pro přesun listu">${svg('grip',14,1.6)}<b>List ${pad2(i+1)}</b><span>${fmtLabel(p)} · ${BGS[p.bg]}</span></span>`+
+      `<button class="hbtn" data-act="conv" title="Převést rukopis na tomto listu na text">${svg('convert',17)}Převést</button>`+
+      `<button class="hbtn" data-act="menu" aria-label="Nastavení listu">${svg('more',18)}</button>`;
+    h.style.left=p.x+'px';h.style.top=p.y+'px';
+    world.appendChild(h);
+    const g=document.createElement('div');g.className='grip';g.dataset.id=p.id;g.title='Změnit velikost listu';
+    g.style.left=(p.x+p.w)+'px';g.style.top=(p.y+p.h)+'px';
+    world.appendChild(g);
+  });
+  for(const im of doc.images){const p=pageById(im.pageId);if(p) world.appendChild(makeIbox(im,p));}
+  for(const t of doc.texts){if(pageById(t.pageId)) world.appendChild(makeText(t));}
+  renderImages();
+}
+function updatePositions(){
+  for(const h of world.querySelectorAll('.hdr')){const p=pageById(h.dataset.id);if(p){h.style.left=p.x+'px';h.style.top=p.y+'px';}}
+  for(const g of world.querySelectorAll('.grip')){const p=pageById(g.dataset.id);if(p){g.style.left=(p.x+p.w)+'px';g.style.top=(p.y+p.h)+'px';}}
+  for(const d of world.querySelectorAll('.tb')){const t=textById(d.dataset.id),p=t&&pageById(t.pageId);if(p){d.style.left=(p.x+t.x)+'px';d.style.top=(p.y+t.y)+'px';}}
+  for(const d of world.querySelectorAll('.ibox')){const im=imageById(d.dataset.id),p=im&&pageById(im.pageId);if(p)placeIbox(d,im,p);}
+  renderImages();
+}
+function autosize(ta){ta.style.height='auto';ta.style.height=ta.scrollHeight+2+'px';}
+function makeText(t){
+  const p=pageById(t.pageId);
+  const d=document.createElement('div');d.className='tb';d.dataset.id=t.id;
+  d.style.left=(p.x+t.x)+'px';d.style.top=(p.y+t.y)+'px';d.style.width=t.w+'px';
+  d.innerHTML=`<div class="tbar"><span class="tmove" title="Přetáhni pro přesun textu">${svg('grip',14,1.6)}</span><button data-a="smaller" title="Menší písmo">A−</button><button data-a="bigger" title="Větší písmo">A+</button><button data-a="del" title="Smazat text" aria-label="Smazat text">${svg('x',14,1.8)}</button></div>`+
+    `<textarea id="t_${t.id}" spellcheck="false" autocomplete="off" autocorrect="off" aria-label="Text na listu"></textarea>`;
+  const ta=d.querySelector('textarea');
+  ta.value=t.text;ta.style.fontSize=t.fs+'px';
+  requestAnimationFrame(()=>autosize(ta));
+  ta.addEventListener('focus',()=>{d._snap=snapshot();d._old=t.text;});
+  ta.addEventListener('input',()=>{t.text=ta.value;autosize(ta);saveSoon();});
+  ta.addEventListener('blur',()=>{
+    const cur=textById(t.id); if(!cur) return;
+    if(!cur.text.trim()){
+      if(cur._new){undoStack.pop();updUndo();} else {undoStack.push(d._snap);redoStack=[];updUndo();}
+      doc.texts=doc.texts.filter(x=>x.id!==t.id);d.remove();saveSoon();
+    }else if(!cur._new&&cur.text!==d._old){undoStack.push(d._snap);redoStack=[];updUndo();}
+    delete cur._new;
+  });
+  d.querySelector('.tbar').addEventListener('click',e=>{
+    const b=e.target.closest('button');if(!b)return;
+    if(b.dataset.a==='del'){pushUndo();doc.texts=doc.texts.filter(x=>x.id!==t.id);d.remove();saveSoon();}
+    else{pushUndo();t.fs=clamp(t.fs+(b.dataset.a==='bigger'?2:-2),12,72);ta.style.fontSize=t.fs+'px';autosize(ta);saveSoon();}
+  });
+  return d;
+}
+function createText(page,lx,ly){
+  pushUndo();
+  const w=Math.max(160,Math.min(520,page.w-lx-16));
+  const t={id:uid(),pageId:page.id,x:Math.max(4,lx-8),y:Math.max(4,ly-18),w,fs:20,text:'',_new:true};
+  doc.texts.push(t);
+  const el=makeText(t);world.appendChild(el);
+  el.querySelector('textarea').focus({preventScroll:true});
+}
+
+/* drag page label / resize grip / move text */
+world.addEventListener('pointerdown',e=>{
+  const grab=e.target.closest('.grab'),grip=e.target.closest('.grip'),th=e.target.closest('.tmove'),ih=e.target.closest('.imove'),ig=e.target.closest('.igrip');
+  if(!grab&&!grip&&!th&&!ih&&!ig) return;
+  e.preventDefault();e.stopPropagation();closePop();
+  const el=grab||grip||th||ih||ig;try{el.setPointerCapture(e.pointerId);}catch(_){}
+  const snap=snapshot();let moved=false;const sx=e.clientX,sy=e.clientY;
+  let obj,ox,oy,kind;
+  if(grab){obj=pageById(grab.closest('.hdr').dataset.id);ox=obj.x;oy=obj.y;kind='move';grab.classList.add('drag');}
+  else if(grip){obj=pageById(grip.dataset.id);ox=obj.w;oy=obj.h;kind='size';}
+  else if(ih){obj=imageById(ih.closest('.ibox').dataset.id);ox=obj.x;oy=obj.y;kind='img';}
+  else if(ig){obj=imageById(ig.closest('.ibox').dataset.id);ox=obj.w;oy=obj.h;kind='imgsize';}
+  else{obj=textById(th.closest('.tb').dataset.id);ox=obj.x;oy=obj.y;kind='text';}
+  const mv=ev=>{
+    const dx=(ev.clientX-sx)/cam.z,dy=(ev.clientY-sy)/cam.z;
+    if(Math.abs(ev.clientX-sx)+Math.abs(ev.clientY-sy)>2) moved=true;
+    if(kind==='move'){obj.x=Math.round((ox+dx)/10)*10;obj.y=Math.round((oy+dy)/10)*10;}
+    else if(kind==='size'){obj.w=Math.max(240,Math.round(ox+dx));obj.h=Math.max(240,Math.round(oy+dy));}
+    else if(kind==='imgsize'){const r=oy/ox,nw=Math.max(40,ox+Math.max(dx,dy/r));obj.w=Math.round(nw);obj.h=Math.round(nw*r);}
+    else{obj.x=ox+dx;obj.y=oy+dy;}
+    updatePositions();requestRender();
+  };
+  const up=()=>{
+    el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',up);el.removeEventListener('pointercancel',up);
+    if(grab) grab.classList.remove('drag');
+    if(moved){
+      if(kind==='img') reparentImage(obj);
+      undoStack.push(snap);redoStack=[];updUndo();if(kind==='size'||kind==='img')renderOverlay();saveSoon();
+    }
+  };
+  el.addEventListener('pointermove',mv);el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);
+});
+world.addEventListener('click',e=>{
+  const b=e.target.closest('.hbtn');if(!b)return;
+  const p=pageById(b.closest('.hdr').dataset.id);if(!p)return;
+  if(b.dataset.act==='conv'){closePop();convertStrokes(doc.strokes.filter(s=>s.pageId===p.id));}
+  else openPageMenu(p,b);
+});
+
+/* ---------- photos and pictures on pages ---------- */
+const imgEls=new Map();
+let freshIds=new Set();
+const imageById=id=>(doc&&doc.images||[]).find(i=>i.id===id);
+function renderImages(){
+  imgsEl.textContent='';
+  if(!doc) return;
+  for(const p of doc.pages){
+    const list=doc.images.filter(i=>i.pageId===p.id);if(!list.length) continue;
+    const wrap=document.createElement('div');wrap.className='pimg';
+    wrap.style.cssText=`left:${p.x}px;top:${p.y}px;width:${p.w}px;height:${p.h}px`;
+    for(const im of list){
+      let el=imgEls.get(im.id);
+      if(!el||el._src!==im.src){el=new Image();el.alt='';el.decoding='async';el.draggable=false;el.src=im.src;el._src=im.src;imgEls.set(im.id,el);}
+      el.style.cssText=`left:${im.x}px;top:${im.y}px;width:${im.w}px;height:${im.h}px`;
+      wrap.appendChild(el);
+    }
+    imgsEl.appendChild(wrap);
+  }
+}
+function placeIbox(d,im,p){d.style.left=(p.x+im.x)+'px';d.style.top=(p.y+im.y)+'px';d.style.width=im.w+'px';d.style.height=im.h+'px';}
+function makeIbox(im,p){
+  const d=document.createElement('div');d.className='ibox'+(freshIds.has(im.id)?' fresh':'');d.dataset.id=im.id;placeIbox(d,im,p);
+  d.innerHTML=`<div class="ibar"><span class="imove" title="Přetáhni pro přesun">${svg('grip',14,1.6)}Přesunout</span>`+
+    `<button data-ia="view" title="Zobrazit ve velkém" aria-label="Zobrazit ve velkém">${svg('eye',16)}</button>`+
+    `<button data-ia="read" title="Přečíst text z fotky">${svg('convert',16)}Text z fotky</button>`+
+    `<button data-ia="del" title="Smazat obrázek" aria-label="Smazat obrázek">${svg('trash',16)}</button></div><div class="igrip" title="Změnit velikost"></div>`;
+  return d;
+}
+function reparentImage(im){
+  const op=pageById(im.pageId);if(!op) return;
+  const np=pageAt(op.x+im.x+im.w/2,op.y+im.y+im.h/2);
+  if(np&&np.id!==im.pageId){im.x+=op.x-np.x;im.y+=op.y-np.y;im.pageId=np.id;}
+}
+world.addEventListener('click',e=>{
+  const b=e.target.closest('[data-ia]');if(!b) return;
+  const im=imageById(b.closest('.ibox').dataset.id);if(!im) return;
+  const a=b.dataset.ia;
+  if(a==='del'){pushUndo();doc.images=doc.images.filter(i=>i.id!==im.id);imgEls.delete(im.id);renderOverlay();requestRender();saveSoon();toast('Obrázek je smazaný. Zpět ho vrátí.');}
+  else if(a==='view') viewImage(im);
+  else if(a==='read') readImageText(im);
+});
+function loadImageFile(file){
+  return new Promise((res,rej)=>{
+    const url=URL.createObjectURL(file),i=new Image();
+    i.onload=()=>{res(i);setTimeout(()=>URL.revokeObjectURL(url),1000);};
+    i.onerror=()=>{URL.revokeObjectURL(url);rej(new Error('load'));};
+    i.src=url;
+  });
+}
+async function fileToImage(file){
+  const img=await loadImageFile(file);
+  let w=img.naturalWidth,h=img.naturalHeight;if(!w||!h) throw new Error('empty');
+  const s=Math.min(1,2000/Math.max(w,h));w=Math.round(w*s);h=Math.round(h*s);
+  const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');
+  const alpha=/png|gif|webp/.test(file.type);
+  if(!alpha){g.fillStyle='#fff';g.fillRect(0,0,w,h);}
+  g.drawImage(img,0,0,w,h);
+  let src=alpha?c.toDataURL('image/png'):c.toDataURL('image/jpeg',.86);
+  if(alpha&&src.length>2500000){g.globalCompositeOperation='destination-over';g.fillStyle='#fff';g.fillRect(0,0,w,h);src=c.toDataURL('image/jpeg',.86);}
+  return {src,w,h};
+}
+function targetPage(){
+  const c=toWorld(W/2,H/2);let p=pageAt(c.x,c.y);if(p) return p;
+  let best=null,bd=Infinity;
+  for(const q of doc.pages){const dx=Math.max(q.x-c.x,0,c.x-(q.x+q.w)),dy=Math.max(q.y-c.y,0,c.y-(q.y+q.h)),d=dx*dx+dy*dy;if(d<bd){bd=d;best=q;}}
+  return best;
+}
+async function insertImages(files){
+  files=[...files].filter(f=>(f.type||'').startsWith('image/')||/\.(jpe?g|png|webp|gif|heic|heif)$/i.test(f.name||''));
+  if(!files.length||!doc) return;
+  let page=targetPage();
+  if(!page){addPage();page=doc.pages[doc.pages.length-1];}
+  toast(files.length>1?`Vkládám ${files.length} obrázky…`:'Vkládám obrázek…');
+  const snap=snapshot();let added=0,off=0;
+  const c=toWorld(W/2,H/2);
+  for(const f of files){
+    let r;try{r=await fileToImage(f);}catch(e){toast('Tenhle soubor se nepodařilo načíst jako obrázek');continue;}
+    const s=Math.min(1,(page.w-80)/r.w,(page.h*.7)/r.h),w=Math.round(r.w*s),h=Math.round(r.h*s);
+    const x=clamp(c.x-page.x-w/2+off,24,Math.max(24,page.w-w-24)),y=clamp(c.y-page.y-h/2+off,24,Math.max(24,page.h-h-24));
+    const im={id:uid(),pageId:page.id,x:Math.round(x),y:Math.round(y),w,h,src:r.src};
+    doc.images.push(im);freshIds.add(im.id);added++;off+=32;
+  }
+  if(!added) return;
+  undoStack.push(snap);if(undoStack.length>100)undoStack.shift();redoStack=[];updUndo();
+  renderOverlay();requestRender();saveSoon();
+  toast(added>1?'Obrázky jsou na listu. Přesunout a zvětšit je můžeš i později v režimu Laso.':'Obrázek je na listu. Přesunout a zvětšit ho můžeš i později v režimu Laso.');
+}
+function viewImage(im){
+  openSheet(`<img class="viewimg" src="${im.src}" alt="Obrázek z listu"><div class="row"><button class="btn primary" id="viRead">${svg('convert',17)}Přečíst text z fotky</button><button class="btn" data-close>Zavřít</button></div>`);
+  sheet.querySelector('.card').classList.add('wide');
+  $('#viRead').onclick=()=>readImageText(im);
+}
+async function readImageText(im){
+  const el=imgEls.get(im.id);
+  let res=null;
+  if('TextDetector' in window&&el){
+    try{if(!el.complete) await el.decode();res=await new TextDetector().detect(el);}catch(e){res=null;}
+  }
+  if(!res){
+    openSheet(`<h2>Text z fotky tady nejde</h2>
+      <p>Aby fotky zůstaly soukromé, WRITE OUT je nikam neposílá. Tenhle prohlížeč ale neumí přečíst text z obrázku sám v zařízení.</p>
+      <p>Fotka zůstává na listu jako obrázek a můžeš do ní psát a kreslit perem.</p>
+      <section><h3>Tip pro iPad</h3><p>Otevři fotku ve velkém a podrž prst na textu. iPad umí text na fotkách často rozpoznat sám v zařízení (Živý text) a nabídne Kopírovat. Tištěný text funguje nejlépe, u rukopisu a češtiny to nemusí vyjít.</p></section>
+      <div class="row"><button class="btn primary" id="viOpen">${svg('eye',17)}Otevřít fotku ve velkém</button><button class="btn" data-close>Zavřít</button></div>`);
+    $('#viOpen').onclick=()=>viewImage(im);
+    return;
+  }
+  const text=res.slice().sort((a,b)=>(a.boundingBox.y-b.boundingBox.y)||(a.boundingBox.x-b.boundingBox.x)).map(r=>r.rawValue).join('\n');
+  openSheet(`<h2>Text z fotky</h2><p class="note">Přečteno přímo v tomto zařízení. Před vložením ho můžeš opravit.</p>
+    <textarea class="big" id="convText" spellcheck="false" aria-label="Text z fotky"></textarea>
+    <div class="row"><button class="btn primary" id="itIns">Vložit pod obrázek</button><button class="btn" id="itCopy">${svg('copy',17)}Kopírovat</button><button class="btn" data-close>Zavřít</button></div>`);
+  const ta=$('#convText');ta.value=text;if(!text)ta.placeholder='Na fotce se žádný text nenašel.';
+  $('#itCopy').onclick=()=>copyText(ta.value,ta);
+  $('#itIns').onclick=()=>{
+    const v=ta.value.trim();if(!v){toast('Text je prázdný');return;}
+    const p=pageById(im.pageId);pushUndo();
+    doc.texts.push({id:uid(),pageId:im.pageId,x:Math.max(4,im.x),y:Math.min(p.h-60,im.y+im.h+10),w:Math.max(240,Math.min(im.w,p.w-im.x-8)),fs:18,text:v});
+    closeSheet();renderOverlay();saveSoon();toast('Text je vložený pod obrázek');
+  };
+}
+$('#imgBtn').innerHTML=svg('image');
+$('#imgBtn').onclick=()=>{const f=$('#imgFile');f.value='';f.click();};
+$('#imgFile').onchange=e=>{insertImages(e.target.files);};
+addEventListener('paste',e=>{
+  if(!doc||!libEl.hidden||!sheet.hidden) return;
+  const files=[...((e.clipboardData&&e.clipboardData.files)||[])].filter(f=>f.type.startsWith('image/'));
+  if(files.length){e.preventDefault();insertImages(files);}
+});
+stage.addEventListener('dragover',e=>{if(e.dataTransfer&&[...e.dataTransfer.types].includes('Files'))e.preventDefault();});
+stage.addEventListener('drop',e=>{if(!e.dataTransfer||!e.dataTransfer.files.length)return;e.preventDefault();insertImages(e.dataTransfer.files);});
+
+/* ---------- pointer input on the canvas ---------- */
+stage.addEventListener('pointerdown',onDown);
+stage.addEventListener('pointermove',onMove);
+stage.addEventListener('pointerup',onUp);
+stage.addEventListener('pointercancel',onUp);
+stage.addEventListener('pointerleave',e=>{if(!ptrs.has(e.pointerId)&&prefs.tool==='eraser')eraserHover(null);});
+
+function onDown(e){
+  if(e.target.closest&&e.target.closest('.hdr,.grip,.tb,.ibox')) return;
+  if(freshIds.size){freshIds=new Set();world.querySelectorAll('.ibox.fresh').forEach(x=>x.classList.remove('fresh'));}
+  closePop();
+  const ae=document.activeElement; if(ae&&ae.tagName==='TEXTAREA') ae.blur();
+  const p=local(e),type=e.pointerType;
+  if(type==='pen'){
+    lastPen=Date.now();
+    if(!prefs.penSeen){prefs.penSeen=true;savePrefs();}
+    if(action&&action.touch){ if(action.type==='draw'||action.type==='lasso'){action=null;scheduleLive();} else action=null; for(const [id,v] of ptrs) if(v.type==='touch') ptrs.delete(id); }
+  }
+  if(type==='touch'){
+    if(action&&action.pen) return;
+    if(prefs.penSeen&&fingerPans()&&Date.now()-lastPen<350) return;
+  }
+  ptrs.set(e.pointerId,{x:p.x,y:p.y,type});
+  try{stage.setPointerCapture(e.pointerId);}catch(_){}
+  if(type==='touch'){
+    const touches=[...ptrs.entries()].filter(([,v])=>v.type==='touch');
+    if(touches.length>=2){
+      if(action&&(action.type==='draw'||action.type==='lasso'||action.type==='erase')){
+        if(action.type==='erase'&&action.changed){undoStack.push(action.snap);redoStack=[];updUndo();saveSoon();}
+        action=null;scheduleLive();
+      }
+      startPinch(touches);return;
+    }
+    if(prefs.tool==='hand'||fingerPans()){startPan(e.pointerId,p,true);return;}
+  }
+  if(type==='mouse'){
+    if(e.button===1||spaceDown){startPan(e.pointerId,p,false);return;}
+    if(e.button!==0){ptrs.delete(e.pointerId);return;}
+  }
+  if(prefs.tool==='hand'){startPan(e.pointerId,p,type==='touch');return;}
+  startTool(e,p);
+}
+function startPan(id,p,touch){action={type:'pan',id,touch,sx:p.x,sy:p.y,cx:cam.x,cy:cam.y};}
+function startPinch(t){
+  const a=t[0][1],b=t[1][1],c0={x:(a.x+b.x)/2,y:(a.y+b.y)/2};
+  action={type:'pinch',touch:true,ids:[t[0][0],t[1][0]],d0:Math.hypot(a.x-b.x,a.y-b.y)||1,z0:cam.z,w0:toWorld(c0.x,c0.y)};
+}
+function doPinch(){
+  const a=ptrs.get(action.ids[0]),b=ptrs.get(action.ids[1]);if(!a||!b)return;
+  const d=Math.hypot(a.x-b.x,a.y-b.y),c={x:(a.x+b.x)/2,y:(a.y+b.y)/2};
+  const z=clamp(action.z0*d/action.d0,.08,5);
+  cam.z=z;cam.x=c.x-action.w0.x*z;cam.y=c.y-action.w0.y*z;applyCam();
+}
+function startTool(e,p){
+  const w=toWorld(p.x,p.y);
+  const t=(e.pointerType==='pen'&&(e.buttons&32))?'eraser':prefs.tool;
+  const base={id:e.pointerId,pen:e.pointerType==='pen',touch:e.pointerType==='touch'};
+  if(t==='pen'||t==='marker'){
+    const page=pageAt(w.x,w.y);
+    if(!page){startPan(e.pointerId,p,base.touch);return;}
+    const ts=prefs.ts[t];
+    const st={id:uid(),pageId:page.id,k:t,c:(t==='pen'?PEN_COLORS:MARK_COLORS)[ts.c],s:(t==='pen'?PEN_SIZES:MARK_SIZES)[ts.s],st:Date.now(),pts:[]};
+    action={...base,type:'draw',st,page,t0:performance.now()};
+    addPt(e,w);scheduleLive();
+  }else if(t==='eraser'){
+    action={...base,type:'erase',snap:snapshot(),changed:false,cur:p};
+    eraseAt(w);scheduleLive();
+  }else if(t==='lasso'){
+    if(sel.size){
+      const b=selBBox(),m=8/cam.z;
+      if(b&&w.x>=b.x-m&&w.x<=b.x+b.w+m&&w.y>=b.y-m&&w.y<=b.y+b.h+m){action={...base,type:'movesel',start:w};return;}
+      clearSel();
+    }
+    action={...base,type:'lasso',pts:[[w.x,w.y]]};
+  }else if(t==='text'){
+    const page=pageAt(w.x,w.y);
+    if(!page){startPan(e.pointerId,p,base.touch);return;}
+    action={...base,type:'textTap',page,w,sx:p.x,sy:p.y};
+  }
+}
+function addPt(e,w){
+  const a=action,page=a.page,pts=a.st.pts;
+  const x=Math.round((w.x-page.x)*10)/10,y=Math.round((w.y-page.y)*10)/10;
+  const last=pts[pts.length-1];
+  if(last&&Math.hypot(x-last[0],y-last[1])<0.7/cam.z) return;
+  const pr=e.pointerType==='pen'?(e.pressure||.5):.5;
+  pts.push([x,y,Math.round(pr*100)/100,Math.round(performance.now()-a.t0)]);
+}
+function onMove(e){
+  if(!ptrs.has(e.pointerId)){
+    if(prefs.tool==='eraser'&&e.pointerType!=='touch'&&!action) eraserHover(local(e));
+    return;
+  }
+  const p=local(e),r=ptrs.get(e.pointerId);r.x=p.x;r.y=p.y;
+  if(!action) return;
+  if(action.type==='pinch'){doPinch();return;}
+  if(action.id!==e.pointerId) return;
+  switch(action.type){
+    case 'pan':cam.x=action.cx+(p.x-action.sx);cam.y=action.cy+(p.y-action.sy);applyCam();break;
+    case 'draw':{
+      const evs=(e.getCoalescedEvents&&e.getCoalescedEvents())||[];
+      for(const ce of (evs.length?evs:[e])){const q=local(ce);addPt(ce,toWorld(q.x,q.y));}
+      scheduleLive();break;}
+    case 'erase':action.cur=p;eraseAt(toWorld(p.x,p.y));scheduleLive();break;
+    case 'lasso':{const w=toWorld(p.x,p.y);action.pts.push([w.x,w.y]);scheduleLive();break;}
+    case 'movesel':{const w=toWorld(p.x,p.y);selOff={x:w.x-action.start.x,y:w.y-action.start.y};requestRender();break;}
+    case 'textTap':if(Math.hypot(p.x-action.sx,p.y-action.sy)>10) action.moved=true;break;
+  }
+}
+function onUp(e){
+  if(!ptrs.has(e.pointerId)) return;
+  ptrs.delete(e.pointerId);
+  if(!action) return;
+  if(action.type==='pinch'){
+    if(action.ids.includes(e.pointerId)){action=null;saveSoon("cam");}
+    return;
+  }
+  if(action.id!==e.pointerId) return;
+  const a=action;action=null;
+  switch(a.type){
+    case 'draw':
+      if(a.st.pts.length){pushUndo();doc.strokes.push(a.st);saveSoon();}
+      requestRender();scheduleLive();break;
+    case 'erase':
+      if(a.changed){undoStack.push(a.snap);redoStack=[];updUndo();saveSoon();}
+      scheduleLive();break;
+    case 'lasso':finishLasso(a.pts);scheduleLive();break;
+    case 'movesel':commitMove();break;
+    case 'textTap':if(!a.moved&&e.type!=='pointercancel') createText(a.page,a.w.x-a.page.x,a.w.y-a.page.y);break;
+    case 'pan':saveSoon("cam");break;
+  }
+}
+function segDist(px,py,ax,ay,bx,by){
+  const dx=bx-ax,dy=by-ay,l=dx*dx+dy*dy;
+  let t=l?((px-ax)*dx+(py-ay)*dy)/l:0;t=clamp(t,0,1);
+  return Math.hypot(px-(ax+t*dx),py-(ay+t*dy));
+}
+function eraseAt(w){
+  const r=ERASER_SIZES[prefs.ts.eraser.s]/2/cam.z;
+  const hit=new Set();
+  for(const s of doc.strokes){
+    const p=pageById(s.pageId);if(!p)continue;
+    const lx=w.x-p.x,ly=w.y-p.y,b=bboxOf(s);
+    if(lx<b.x-r||lx>b.x+b.w+r||ly<b.y-r||ly>b.y+b.h+r) continue;
+    const pts=s.pts,rr=r+s.s/2;
+    if(pts.length===1){if(Math.hypot(lx-pts[0][0],ly-pts[0][1])<rr)hit.add(s.id);continue;}
+    for(let i=1;i<pts.length;i++){if(segDist(lx,ly,pts[i-1][0],pts[i-1][1],pts[i][0],pts[i][1])<rr){hit.add(s.id);break;}}
+  }
+  if(hit.size){doc.strokes=doc.strokes.filter(s=>!hit.has(s.id));action.changed=true;requestRender();}
+}
+
+/* ---------- lasso selection ---------- */
+function inPoly(x,y,poly){
+  let inside=false;
+  for(let i=0,j=poly.length-1;i<poly.length;j=i++){
+    const xi=poly[i][0],yi=poly[i][1],xj=poly[j][0],yj=poly[j][1];
+    if(((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi)) inside=!inside;
+  }
+  return inside;
+}
+function finishLasso(poly){
+  if(poly.length<4){clearSel();return;}
+  sel=new Set();
+  for(const s of doc.strokes){
+    const p=pageById(s.pageId);if(!p)continue;
+    const step=Math.max(1,Math.floor(s.pts.length/24));let n=0,inn=0;
+    for(let i=0;i<s.pts.length;i+=step){n++;if(inPoly(s.pts[i][0]+p.x,s.pts[i][1]+p.y,poly))inn++;}
+    if(n&&inn/n>=.5) sel.add(s.id);
+  }
+  if(!sel.size) toast('Laso nezachytilo žádný rukopis');
+  updateSelbar();requestRender();
+}
+function selStrokes(){return doc.strokes.filter(s=>sel.has(s.id));}
+function selBBox(){
+  const list=selStrokes();if(!list.length) return null;
+  let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+  for(const s of list){const p=pageById(s.pageId),b=bboxOf(s);x0=Math.min(x0,b.x+p.x);y0=Math.min(y0,b.y+p.y);x1=Math.max(x1,b.x+b.w+p.x);y1=Math.max(y1,b.y+b.h+p.y);}
+  return {x:x0,y:y0,w:x1-x0,h:y1-y0};
+}
+function clearSel(){sel=new Set();selOff={x:0,y:0};updateSelbar();requestRender();}
+function commitMove(){
+  const dx=selOff.x,dy=selOff.y;selOff={x:0,y:0};
+  if(Math.abs(dx)+Math.abs(dy)<.5){requestRender();return;}
+  pushUndo();
+  doc.strokes=doc.strokes.map(s=>sel.has(s.id)?{...s,pts:s.pts.map(q=>[Math.round((q[0]+dx)*10)/10,Math.round((q[1]+dy)*10)/10,q[2],q[3]])}:s);
+  saveSoon();requestRender();
+}
+const selbar=$('#selbar');
+function updateSelbar(){
+  selbar.hidden=!sel.size;
+  if(sel.size){$('#selConvert').innerHTML=`${svg('convert',18)}Převést na text`;$('#selDelete').innerHTML=`${svg('trash',18)}Smazat`;positionSelbar();}
+}
+function positionSelbar(){
+  if(selbar.hidden) return;
+  const b=selBBox();if(!b){selbar.hidden=true;return;}
+  const bw=selbar.offsetWidth,bh=selbar.offsetHeight;
+  let x=(b.x+selOff.x+b.w/2)*cam.z+cam.x+rect.left-bw/2;
+  let y=(b.y+selOff.y)*cam.z+cam.y+rect.top-bh-16;
+  if(y<rect.top+70) y=(b.y+selOff.y+b.h)*cam.z+cam.y+rect.top+16;
+  x=clamp(x,16,innerWidth-bw-16);y=clamp(y,16,innerHeight-bh-16);
+  selbar.style.left=x+'px';selbar.style.top=y+'px';
+}
+$('#selClear').onclick=clearSel;
+$('#selDelete').onclick=()=>{pushUndo();doc.strokes=doc.strokes.filter(s=>!sel.has(s.id));clearSel();saveSoon();};
+$('#selConvert').onclick=()=>convertStrokes(selStrokes());
+
+/* ---------- handwriting recognition, on this device only ---------- */
+const hwLangP=(async()=>{
+  if(!('createHandwritingRecognizer' in navigator)) return null;
+  for(const lang of ['cs','en']){
+    try{
+      if(navigator.queryHandwritingRecognizer){const r=await navigator.queryHandwritingRecognizer({languages:[lang]});if(r) return lang;}
+      else if(navigator.queryHandwritingRecognizerSupport){const r=await navigator.queryHandwritingRecognizerSupport({languages:[lang]});if(r&&r.languages!==false) return lang;}
+      else return lang;
+    }catch(e){}
+  }
+  return null;
+})();
+function groupLines(list){
+  const items=list.map(s=>{const p=pageById(s.pageId),b=bboxOf(s);return {s,top:b.y+p.y,bot:b.y+b.h+p.y,cy:b.y+b.h/2+p.y};}).sort((a,b)=>a.cy-b.cy);
+  const lines=[];
+  for(const it of items){
+    let L=null;
+    for(const l of lines){
+      const ov=Math.min(l.bot,it.bot)-Math.max(l.top,it.top),h=Math.max(1,Math.min(l.bot-l.top,it.bot-it.top));
+      if(ov>.4*h||(it.cy>l.top&&it.cy<l.bot)){L=l;break;}
+    }
+    if(L){L.items.push(it);L.top=Math.min(L.top,it.top);L.bot=Math.max(L.bot,it.bot);}
+    else lines.push({top:it.top,bot:it.bot,items:[it]});
+  }
+  lines.sort((a,b)=>a.top-b.top);
+  return lines.map(l=>l.items.map(i=>i.s).sort((a,b)=>(a.st||0)-(b.st||0)));
+}
+async function recognize(list,lang){
+  const rec=await navigator.createHandwritingRecognizer({languages:[lang]});
+  const out=[];
+  try{
+    for(const line of groupLines(list)){
+      const d=rec.startDrawing({recognitionType:'text',inputType:'stylus',alternatives:1});
+      const t0=Math.min(...line.map(s=>s.st||0));let T=0;
+      for(const s of line){
+        const p=pageById(s.pageId),hs=new HandwritingStroke();
+        for(const q of s.pts){let t=(s.st-t0)+(q[3]||0);if(t<=T)t=T+1;T=t;hs.addPoint({x:q[0]+p.x,y:q[1]+p.y,t});}
+        d.addStroke(hs);
+      }
+      const pr=await d.getPrediction();
+      out.push(pr&&pr[0]?pr[0].text:'');
+      if(d.clear) d.clear();
+    }
+  }finally{if(rec.finish) rec.finish();}
+  return out.filter(x=>x.trim()).join('\n');
+}
+async function convertStrokes(list){
+  list=list.filter(s=>s.k==='pen');
+  if(!list.length){toast('Tady není žádný rukopis perem k převodu');return;}
+  const lang=await hwLangP;
+  if(!lang){openUnsupported();return;}
+  toast('Převádím přímo v zařízení…');
+  let text='';
+  try{text=await recognize(list,lang);}
+  catch(err){openSheet(`<h2>Převod se nepovedl</h2><p>Prohlížeč rozpoznávání rukopisu nabízí, ale teď ho nešlo spustit (${esc(String(err&&err.message||err))}). Zkus to znovu, případně stránku načti znovu.</p><div class="row"><button class="btn primary" data-close>Zavřít</button></div>`);return;}
+  openConvertSheet(text,list,lang);
+}
+function openConvertSheet(text,list,lang){
+  openSheet(`<h2>Převedený text</h2>
+    <p class="note">Rozpoznáno přímo v tomto zařízení${lang==='cs'?', čeština':'. Čeština tu není k dispozici, použila se angličtina'}. Text můžeš před vložením opravit.</p>
+    <textarea class="big" id="convText" spellcheck="false" aria-label="Převedený text"></textarea>
+    <div class="row">
+      <button class="btn primary" id="cvReplace">Nahradit rukopis textem</button>
+      <button class="btn" id="cvKeep">Vložit a rukopis nechat</button>
+      <button class="btn" id="cvCopy">${svg('copy',17)}Kopírovat</button>
+      <button class="btn" data-close>Zavřít</button>
+    </div>`);
+  const ta=$('#convText');ta.value=text||'';
+  if(!text) ta.placeholder='Nic se nerozpoznalo. Můžeš text dopsat sem.';
+  $('#cvReplace').onclick=()=>{insertConverted(ta.value,list,true);closeSheet();};
+  $('#cvKeep').onclick=()=>{insertConverted(ta.value,list,false);closeSheet();};
+  $('#cvCopy').onclick=()=>copyText(ta.value,ta);
+}
+function insertConverted(text,list,replace){
+  if(!text.trim()){toast('Text je prázdný, nic se nevložilo');return;}
+  const page=pageById(list[0].pageId);
+  const own=list.filter(s=>s.pageId===page.id);
+  let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+  for(const s of own){const b=bboxOf(s);x0=Math.min(x0,b.x);y0=Math.min(y0,b.y);x1=Math.max(x1,b.x+b.w);y1=Math.max(y1,b.y+b.h);}
+  const lines=Math.max(1,groupLines(own).length);
+  const fs=Math.round(clamp((y1-y0)/lines*.5,16,40));
+  pushUndo();
+  const w=Math.min(page.w-x0-8,Math.max(x1-x0+20,280));
+  doc.texts.push({id:uid(),pageId:page.id,x:Math.max(4,x0-6),y:Math.max(4,y0-6),w:Math.max(160,w),fs,text:text.trim()});
+  if(replace){const ids=new Set(list.map(s=>s.id));doc.strokes=doc.strokes.filter(s=>!ids.has(s.id));}
+  clearSel();renderOverlay();requestRender();saveSoon();
+  toast(replace?'Rukopis je nahrazený textem. Zpět vrátí rukopis.':'Text je vložený vedle rukopisu');
+}
+function openUnsupported(){
+  openSheet(`<h2>Převod tady zatím nejde</h2>
+    <p>Tenhle prohlížeč neumí rozpoznat rukopis přímo v zařízení. WRITE OUT tvoje texty nikam neposílá, takže převod přes internet záměrně nepoužívá.</p>
+    <section><h3>Na iPadu s Apple Pencil</h3>
+      <p>Vyber nástroj <b>Text</b>, klepni na list a piš tužkou do textového pole. iPad písmo převede na text sám, přímo v zařízení (funkce Psaní rukou, anglicky Scribble). Zapneš ji v Nastavení → Apple Pencil.</p></section>
+    <section><h3>Na tabletu s Androidem nebo na Chromebooku</h3>
+      <p>Otevři WRITE OUT v aktuálním Chromu. Kde Chrome rozpoznávání rukopisu v zařízení nabízí, tlačítko Převést funguje přímo z rukopisu.</p></section>
+    <div class="row"><button class="btn primary" id="goText">Přepnout na nástroj Text</button><button class="btn" data-close>Zavřít</button></div>`);
+  $('#goText').onclick=()=>{setTool('text');closeSheet();};
+}
+
+/* ---------- page actions ---------- */
+function addPage(){
+  const last=doc.pages[doc.pages.length-1];
+  const p={id:uid(),x:last?last.x+last.w+80:0,y:last?last.y:0,w:last?last.w:794,h:last?last.h:1123,bg:last?last.bg:'lines'};
+  pushUndo();doc.pages.push(p);renderOverlay();focusPage(p);requestRender();saveSoon();
+  toast(`Přidán list ${pad2(doc.pages.length)}`);
+}
+function duplicatePage(p){
+  pushUndo();
+  const np={...p,id:uid(),x:p.x+p.w+80};
+  doc.pages.push(np);
+  doc.strokes=doc.strokes.concat(doc.strokes.filter(s=>s.pageId===p.id).map(s=>({...s,id:uid(),pageId:np.id})));
+  doc.texts=doc.texts.concat(doc.texts.filter(t=>t.pageId===p.id).map(t=>({...t,id:uid(),pageId:np.id})));
+  doc.images=doc.images.concat(doc.images.filter(i=>i.pageId===p.id).map(i=>({...i,id:uid(),pageId:np.id})));
+  renderOverlay();focusPage(np);requestRender();saveSoon();toast('List je zduplikovaný');
+}
+function deletePage(p){
+  pushUndo();
+  doc.pages=doc.pages.filter(x=>x.id!==p.id);
+  doc.strokes=doc.strokes.filter(s=>s.pageId!==p.id);
+  doc.texts=doc.texts.filter(t=>t.pageId!==p.id);
+  doc.images=doc.images.filter(i=>i.pageId!==p.id);
+  clearSel();renderOverlay();requestRender();saveSoon();toast('List je smazaný. Zpět ho vrátí.');
+}
+const pm=$('#pagemenu');
+function openPageMenu(p,anchor){
+  const bgPrev={blank:'',lines:'background:repeating-linear-gradient(#fff 0 3px,#A9B6CC 3px 4px)',grid:'background:#fff;background-image:linear-gradient(#A9B6CC 1px,transparent 1px),linear-gradient(90deg,#A9B6CC 1px,transparent 1px);background-size:4px 4px',dots:'background:#fff radial-gradient(#8C9AB3 .8px,transparent 1px) 0 0/4px 4px'};
+  pm.innerHTML=`<div><div class="lab">Formát listu</div><div class="seg">${FORMATS.map(f=>`<button class="chip" data-f="${f.k}" aria-pressed="${f.w===p.w&&f.h===p.h}">${f.label}</button>`).join('')}</div></div>
+    <div><div class="lab">Pozadí</div><div class="seg">${Object.entries(BGS).map(([k,v])=>`<button class="chip" data-bg="${k}" aria-pressed="${p.bg===k}"><span class="bgp" style="${bgPrev[k]}"></span>${v}</button>`).join('')}</div></div>
+    <div class="acts">
+      <button class="act" data-a="conv">${svg('convert',19)}Převést celý list na text</button>
+      <button class="act" data-a="dup">${svg('copy',19)}Duplikovat list</button>
+      <button class="act danger" data-a="del">${svg('trash',19)}Smazat list</button>
+    </div>`;
+  pm.hidden=false;
+  const r=anchor.getBoundingClientRect();
+  pm.style.left=clamp(r.left-8,16,innerWidth-pm.offsetWidth-16)+'px';
+  pm.style.top=clamp(r.bottom+8,16,innerHeight-pm.offsetHeight-16)+'px';
+  pm.onclick=e=>{
+    const b=e.target.closest('button');if(!b)return;
+    if(b.dataset.f){const f=FORMATS.find(x=>x.k===b.dataset.f);pushUndo();p.w=f.w;p.h=f.h;renderOverlay();requestRender();saveSoon();openPageMenu(p,world.querySelector(`.hdr[data-id="${p.id}"] [data-act="menu"]`));}
+    else if(b.dataset.bg){pushUndo();p.bg=b.dataset.bg;renderOverlay();requestRender();saveSoon();openPageMenu(p,world.querySelector(`.hdr[data-id="${p.id}"] [data-act="menu"]`));}
+    else if(b.dataset.a==='conv'){closePop();convertStrokes(doc.strokes.filter(s=>s.pageId===p.id));}
+    else if(b.dataset.a==='dup'){closePop();duplicatePage(p);}
+    else if(b.dataset.a==='del'){
+      if(b.classList.contains('confirm')){closePop();deletePage(p);}
+      else{b.classList.add('confirm');b.innerHTML=`${svg('trash',19)}Klepni znovu, list se smaže`;}
+    }
+  };
+}
+function closePop(){pm.hidden=true;}
+
+/* ---------- sheet (dialog) ---------- */
+const sheet=$('#sheet');
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function openSheet(html){
+  sheet.innerHTML=`<div class="card" role="dialog" aria-modal="true">${html}</div>`;sheet.hidden=false;
+  sheet.querySelectorAll('[data-close]').forEach(b=>b.onclick=closeSheet);
+}
+function closeSheet(){sheet.hidden=true;sheet.innerHTML='';}
+sheet.addEventListener('pointerdown',e=>{if(e.target===sheet)closeSheet();});
+function copyText(text,fallbackEl){
+  const fb=()=>{if(fallbackEl){fallbackEl.focus();fallbackEl.select();}toast('Text je označený, zkopíruj ho ručně');};
+  try{navigator.clipboard.writeText(text).then(()=>toast('Zkopírováno'),fb);}catch(e){fb();}
+}
+function fmtSize(b){return b>1048576?(b/1048576).toFixed(1).replace('.',',')+' MB':Math.max(1,Math.round(b/1024))+' kB';}
+async function fullBackup(){
+  if(doc&&currentId) await saveNow();
+  const docs={};
+  for(const e of lib.docs){docs[e.id]=await kvGet('doc:'+e.id);}
+  return {kind:'writeout-library',v:1,savedAt:Date.now(),lib:{v:1,folders:lib.folders,docs:lib.docs},docs};
+}
+async function openMenu(){
+  const lang=await hwLangP;
+  const backup=await fullBackup();
+  const json=JSON.stringify(backup);
+  const nStrokes=Object.values(backup.docs).reduce((a,d)=>a+(d&&d.strokes?d.strokes.length:0),0);
+  openSheet(`<h2>Write Out</h2>
+    <section><h3>${svg('lock',17)} Soukromí</h3>
+      <p>Dokumenty se ukládají jen do tohoto prohlížeče v tomto zařízení. Nic se neodesílá na server a nevidí je nikdo jiný, ani Claude, ani nikdo, komu pošleš odkaz na aplikaci. Kontrola pravopisu v prohlížeči je vypnutá, aby text neodcházel ven.</p>
+      <p class="note">Když v prohlížeči smažeš data webů, dokumenty zmizí. Proto si občas udělej zálohu.</p>
+      <dl class="kv"><dt>Složky</dt><dd>${lib.folders.length}</dd><dt>Dokumenty</dt><dd>${lib.docs.length}</dd><dt>Tahy perem</dt><dd>${nStrokes}</dd><dt>Velikost</dt><dd>${fmtSize(new Blob([json]).size)}</dd>
+      <dt>Převod rukopisu</dt><dd>${lang?`<span class="pill yes"><i></i>V zařízení (${lang==='cs'?'čeština':'angličtina'})</span>`:`<span class="pill no"><i></i>Tady nedostupný, na iPadu použij nástroj Text</span>`}</dd></dl>
+    </section>
+    <section><h3>Na plochu tabletu</h3>
+      <ol><li>Otevři tuhle stránku v prohlížeči tabletu (Safari na iPadu, Chrome na Androidu).</li><li>Sdílet → Přidat na plochu (v Chromu menu ⋮ → Přidat na plochu).</li><li>WRITE OUT pak spouštěj z ikony. Dokumenty zůstávají v tom prohlížeči, kde jsi je napsala.</li></ol>
+    </section>
+    <section><h3>Prsty na displeji</h3>
+      <div class="seg" id="fingerSeg">
+        <button class="chip" data-v="auto" aria-pressed="${prefs.finger==='auto'}">Automaticky</button>
+        <button class="chip" data-v="draw" aria-pressed="${prefs.finger==='draw'}">Prstem kreslím</button>
+        <button class="chip" data-v="pan" aria-pressed="${prefs.finger==='pan'}">Prstem jen posouvám</button>
+      </div>
+      <p class="note" style="margin-top:8px">Automaticky: jakmile použiješ pero, jeden prst plátno jen posouvá a dlaň na displeji nic nekreslí.</p>
+    </section>
+    <section><h3>Záloha celé knihovny</h3>
+      <p class="note">Záloha je text se všemi složkami a dokumenty. Ulož si ho třeba do souboru a později ho sem vlož zpátky.</p>
+      <div class="row"><button class="btn primary" id="bkCopy">${svg('copy',17)}Zkopírovat zálohu</button>
+        <label class="btn file-in">Obnovit ze souboru…<input type="file" id="bkFile" accept=".json,.txt,application/json,text/plain"></label></div>
+      <textarea class="big code" id="bkText" spellcheck="false" placeholder="Nebo sem vlož text zálohy" aria-label="Text zálohy" style="margin-top:12px"></textarea>
+      <div class="row"><button class="btn danger" id="bkRestore">Obnovit z vloženého textu</button></div>
+    </section>
+    <div class="row"><button class="btn" data-close>Zavřít</button></div>`);
+  $('#fingerSeg').onclick=e=>{const b=e.target.closest('button');if(!b)return;prefs.finger=b.dataset.v;savePrefs();$('#fingerSeg').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));};
+  $('#bkCopy').onclick=()=>{const ta=$('#bkText');ta.value=json;copyText(json,ta);};
+  $('#bkFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;$('#bkText').value=await f.text();armRestore();};
+  $('#bkRestore').onclick=armRestore;
+  async function armRestore(){
+    const b=$('#bkRestore');let data;
+    try{data=JSON.parse($('#bkText').value);}catch(e){toast('Tohle nevypadá jako záloha WRITE OUT');return;}
+    if(data&&Array.isArray(data.pages)){ // single notebook backup from the first version
+      const id=uid(),now=Date.now();
+      lib.docs.push({id,name:'Obnovený dokument',folderId:null,created:now,updated:now,pages:data.pages.length});
+      await kvSet('doc:'+id,{...data,texts:data.texts||[],strokes:data.strokes||[]});await kvSet('lib',lib);
+      closeSheet();toast('Dokument je obnovený');openDoc(id);return;
+    }
+    if(!data||data.kind!=='writeout-library'||!data.lib||!Array.isArray(data.lib.docs)){toast('Tohle nevypadá jako záloha WRITE OUT');return;}
+    if(!b.classList.contains('confirm')){b.classList.add('confirm');b.textContent=`Nahradit celou knihovnu (${data.lib.docs.length} ${plural(data.lib.docs.length,'dokument','dokumenty','dokumentů')})? Klepni znovu`;return;}
+    const oldIds=lib.docs.map(d=>d.id);
+    for(const e of data.lib.docs){if(data.docs&&data.docs[e.id]) await kvSet('doc:'+e.id,data.docs[e.id]);}
+    for(const id of oldIds){if(!data.lib.docs.some(d=>d.id===id)) await kvDel('doc:'+id);}
+    lib={v:1,folders:data.lib.folders||[],docs:data.lib.docs};await kvSet('lib',lib);
+    doc=null;currentId=null;closeSheet();libFolder='all';showLibrary();toast('Knihovna je obnovená ze zálohy');
+  }
+}
+
+/* ---------- library: folders and documents ---------- */
+const libEl=$('#library');
+let libFolder='all', libQuery='';
+const plural=(n,a,b,c)=>n===1?a:(n>=2&&n<=4?b:c);
+function fmtDate(ts){
+  const d=new Date(ts||Date.now()),now=new Date();
+  if(d.toDateString()===now.toDateString()) return 'dnes '+d.toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'});
+  return d.toLocaleDateString('cs-CZ',d.getFullYear()===now.getFullYear()?{day:'numeric',month:'numeric'}:{day:'numeric',month:'numeric',year:'numeric'});
+}
+const inNone=d=>!d.folderId||!folderById(d.folderId);
+async function showLibrary(){
+  closePop();
+  if(doc&&currentId) await saveNow();
+  sel=new Set();selOff={x:0,y:0};selbar.hidden=true;action=null;ptrs.clear();
+  const ae=document.activeElement;if(ae&&ae.tagName==='TEXTAREA')ae.blur();
+  doc=null;currentId=null;cam=null;world.textContent='';imgsEl.textContent='';imgEls.clear();freshIds=new Set();
+  lctx.setTransform(1,0,0,1,0,0);lctx.clearRect(0,0,live.width,live.height);
+  libEl.hidden=false;prefs.view='lib';savePrefs();
+  renderLibrary();
+}
+function frow(id,name,count,color,more){
+  return `<div class="frow${libFolder===id?' on':''}"><button class="fbtn" data-folder="${id}"><span class="fdot" style="--c:${color||'var(--rule-strong)'}"></span><span class="nm">${esc(name)}</span><span class="ct">${count}</span></button>${more?`<button class="fmore" data-fmore="${id}" aria-label="Upravit složku ${esc(name)}">${svg('more',18)}</button>`:''}</div>`;
+}
+function dcard(e){
+  const f=folderById(e.folderId),n=e.pages||1;
+  return `<article class="dcard"><button class="thumb" data-open="${e.id}" aria-label="Otevřít ${esc(e.name)}">${e.thumb?`<img src="${e.thumb}" alt="">`:''}</button>
+    <div class="drow"><div class="dinfo"><button class="dname" data-open="${e.id}" title="${esc(e.name)}">${esc(e.name)}</button>
+    <div class="dsub">${libFolder==='all'&&f?`<span class="fdot" style="--c:${f.color}"></span>${esc(f.name)} ·`:''} ${n} ${plural(n,'list','listy','listů')} · ${fmtDate(e.updated)}</div></div>
+    <button class="fmore" data-dmore="${e.id}" aria-label="Možnosti dokumentu">${svg('more',18)}</button></div></article>`;
+}
+function renderLibrary(){
+  if(libFolder!=='all'&&libFolder!=='none'&&!folderById(libFolder)) libFolder='all';
+  let h=`<div class="flab">Knihovna</div>`+frow('all','Všechny dokumenty',lib.docs.length,'var(--ink)',false)+frow('none','Bez složky',lib.docs.filter(inNone).length,null,false)+`<div class="flab">Složky</div>`;
+  for(const f of lib.folders) h+=frow(f.id,f.name,lib.docs.filter(d=>d.folderId===f.id).length,f.color,true);
+  h+=`<button class="fadd" id="addFolder">${svg('plus',18)}Nová složka</button>`;
+  $('#folders').innerHTML=h;
+  let list=lib.docs.slice().sort((a,b)=>(b.updated||0)-(a.updated||0));
+  if(libFolder==='none') list=list.filter(inNone); else if(libFolder!=='all') list=list.filter(d=>d.folderId===libFolder);
+  if(libQuery) list=list.filter(d=>d.name.toLowerCase().includes(libQuery));
+  const f=folderById(libFolder);
+  $('#libTitle').textContent=libFolder==='all'?'Všechny dokumenty':libFolder==='none'?'Bez složky':f.name;
+  $('#libCount').textContent=`${list.length} ${plural(list.length,'dokument','dokumenty','dokumentů')}`;
+  let g='';
+  if(!libQuery) g+=`<div class="dcard"><button class="newcard" data-new="1">${svg('plus',26)}Nový dokument${f?`<span style="font-size:12px;font-family:var(--mono)">do složky ${esc(f.name)}</span>`:''}</button></div>`;
+  g+=list.map(dcard).join('');
+  if(libQuery&&!list.length) g+=`<div class="empty">Žádný dokument s názvem „${esc(libQuery)}“.</div>`;
+  $('#docGrid').innerHTML=g;
+}
+function placePop(anchor){
+  pm.hidden=false;const r=anchor.getBoundingClientRect();
+  pm.style.left=clamp(r.right-pm.offsetWidth,16,innerWidth-pm.offsetWidth-16)+'px';
+  pm.style.top=clamp(r.bottom+6,16,innerHeight-pm.offsetHeight-16)+'px';
+}
+$('#folders').addEventListener('click',e=>{
+  const fb=e.target.closest('[data-folder]'),fm=e.target.closest('[data-fmore]');
+  if(e.target.closest('#addFolder')){closePop();folderSheet(null);return;}
+  if(fm){openFolderMenu(folderById(fm.dataset.fmore),fm);return;}
+  if(fb){closePop();libFolder=fb.dataset.folder;renderLibrary();}
+});
+$('#docGrid').addEventListener('click',e=>{
+  const o=e.target.closest('[data-open]'),m=e.target.closest('[data-dmore]');
+  if(e.target.closest('[data-new]')){closePop();newDocSheet();return;}
+  if(m){openDocMenu(entryById(m.dataset.dmore),m);return;}
+  if(o){closePop();openDoc(o.dataset.open);}
+});
+libEl.addEventListener('pointerdown',e=>{if(!e.target.closest('.fmore')&&!pm.contains(e.target))closePop();});
+$('#search').addEventListener('input',e=>{libQuery=e.target.value.trim().toLowerCase();renderLibrary();});
+$('#newDoc').onclick=()=>newDocSheet();
+$('#libMenu').innerHTML=svg('lock',21);
+$('#libMenu').onclick=openMenu;
+$('#toLib').onclick=()=>showLibrary();
+
+function openDocMenu(e,anchor){
+  if(!e) return;
+  pm.innerHTML=`<div class="acts" style="border:0;padding:0">
+    <button class="act" data-a="open">${svg('pen',19)}Otevřít</button>
+    <button class="act" data-a="ren">${svg('text',19)}Přejmenovat</button>
+    <button class="act" data-a="move">${svg('grip',19)}Přesunout do složky</button>
+    <button class="act" data-a="dup">${svg('copy',19)}Duplikovat</button>
+    <button class="act danger" data-a="del">${svg('trash',19)}Smazat dokument</button></div>`;
+  placePop(anchor);
+  pm.onclick=async ev=>{
+    const b=ev.target.closest('button');if(!b)return;const a=b.dataset.a;
+    if(a==='open'){closePop();openDoc(e.id);}
+    else if(a==='ren'){closePop();nameSheet('Přejmenovat dokument',e.name,'Uložit',v=>{e.name=v;kvSet('lib',lib);renderLibrary();});}
+    else if(a==='move'){closePop();moveSheet(e);}
+    else if(a==='dup'){closePop();await duplicateDoc(e);}
+    else if(a==='del'){
+      if(b.classList.contains('confirm')){closePop();lib.docs=lib.docs.filter(d=>d.id!==e.id);await kvDel('doc:'+e.id);await kvSet('lib',lib);renderLibrary();toast(`Dokument „${e.name}“ je smazaný`);}
+      else{b.classList.add('confirm');b.innerHTML=`${svg('trash',19)}Smazat natrvalo? Klepni znovu`;}
+    }
+  };
+}
+function openFolderMenu(f,anchor){
+  if(!f) return;
+  pm.innerHTML=`<div class="acts" style="border:0;padding:0"><button class="act" data-a="ren">${svg('text',19)}Přejmenovat složku</button></div>
+    <div><div class="lab">Barva</div><div class="seg">${FOLDER_COLORS.map(c=>`<button class="sw" data-c="${c}" style="--c:${c};width:38px" aria-label="Barva" aria-pressed="${f.color===c}"><span></span></button>`).join('')}</div></div>
+    <div class="acts"><button class="act danger" data-a="del">${svg('trash',19)}Smazat složku</button></div>`;
+  placePop(anchor);
+  pm.onclick=async ev=>{
+    const b=ev.target.closest('button');if(!b)return;
+    if(b.dataset.c){f.color=b.dataset.c;await kvSet('lib',lib);renderLibrary();openFolderMenu(f,document.querySelector(`[data-fmore="${f.id}"]`));return;}
+    if(b.dataset.a==='ren'){closePop();folderSheet(f);}
+    else if(b.dataset.a==='del'){
+      if(b.classList.contains('confirm')){
+        closePop();lib.folders=lib.folders.filter(x=>x.id!==f.id);
+        for(const d of lib.docs) if(d.folderId===f.id) d.folderId=null;
+        await kvSet('lib',lib);if(libFolder===f.id)libFolder='all';renderLibrary();toast('Složka je smazaná, dokumenty jsou v části Bez složky');
+      }else{b.classList.add('confirm');b.innerHTML=`${svg('trash',19)}Smazat? Dokumenty zůstanou`;}
+    }
+  };
+}
+function nameSheet(title,value,okText,onOk){
+  openSheet(`<h2>${esc(title)}</h2><div class="lab">Název</div><input class="field" id="nameIn" maxlength="80" autocomplete="off" spellcheck="false">
+    <div class="row"><button class="btn primary" id="nameOk">${esc(okText)}</button><button class="btn" data-close>Zrušit</button></div>`);
+  const i=$('#nameIn');i.value=value||'';i.focus();i.select();
+  const ok=()=>{const v=i.value.trim();if(!v){toast('Napiš název');return;}closeSheet();onOk(v);};
+  $('#nameOk').onclick=ok;i.onkeydown=e=>{if(e.key==='Enter')ok();};
+}
+function folderChips(cur){
+  return `<div class="seg" id="folderPick"><button class="chip" data-f="" aria-pressed="${!cur}">Bez složky</button>${lib.folders.map(f=>`<button class="chip" data-f="${f.id}" aria-pressed="${cur===f.id}"><span class="fdot" style="--c:${f.color}"></span>${esc(f.name)}</button>`).join('')}</div>`;
+}
+function bindPick(root,sel,cb){root.onclick=e=>{const b=e.target.closest('button');if(!b)return;root.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));cb(b);};}
+function folderSheet(f){
+  let color=f?f.color:FOLDER_COLORS[lib.folders.length%FOLDER_COLORS.length];
+  openSheet(`<h2>${f?'Přejmenovat složku':'Nová složka'}</h2><div class="lab">Název</div><input class="field" id="nameIn" maxlength="60" autocomplete="off" spellcheck="false" placeholder="Třeba Deník, Práce, Japonsko">
+    <div class="lab">Barva</div><div class="seg" id="colPick">${FOLDER_COLORS.map(c=>`<button class="sw" data-c="${c}" style="--c:${c};width:40px" aria-label="Barva" aria-pressed="${color===c}"><span></span></button>`).join('')}</div>
+    <div class="row"><button class="btn primary" id="nameOk">${f?'Uložit':'Vytvořit složku'}</button><button class="btn" data-close>Zrušit</button></div>`);
+  const i=$('#nameIn');i.value=f?f.name:'';i.focus();
+  bindPick($('#colPick'),null,b=>color=b.dataset.c);
+  const ok=async()=>{
+    const v=i.value.trim();if(!v){toast('Napiš název složky');return;}
+    if(f){f.name=v;f.color=color;}else{const nf={id:uid(),name:v,color};lib.folders.push(nf);libFolder=nf.id;}
+    await kvSet('lib',lib);closeSheet();renderLibrary();
+  };
+  $('#nameOk').onclick=ok;i.onkeydown=e=>{if(e.key==='Enter')ok();};
+}
+function moveSheet(e){
+  openSheet(`<h2>Přesunout dokument</h2><p class="note">„${esc(e.name)}“ přesunout do:</p>${folderChips(e.folderId&&folderById(e.folderId)?e.folderId:'')}
+    <div class="row"><button class="btn" data-close>Zavřít</button></div>`);
+  bindPick($('#folderPick'),null,async b=>{e.folderId=b.dataset.f||null;await kvSet('lib',lib);closeSheet();renderLibrary();const f=folderById(e.folderId);toast(f?`Přesunuto do složky ${f.name}`:'Přesunuto do části Bez složky');});
+}
+function newDocSheet(){
+  let folder=folderById(libFolder)?libFolder:'', fk='a4p', bg='lines';
+  openSheet(`<h2>Nový dokument</h2><div class="lab">Název</div><input class="field" id="nameIn" maxlength="80" autocomplete="off" spellcheck="false" placeholder="Bez názvu">
+    <div class="lab">Složka</div>${folderChips(folder)}
+    <div class="lab">První list</div><div class="seg" id="fmtPick">${FORMATS.map(f=>`<button class="chip" data-k="${f.k}" aria-pressed="${f.k===fk}">${f.label}</button>`).join('')}</div>
+    <div class="seg" id="bgPick" style="margin-top:8px">${Object.entries(BGS).map(([k,v])=>`<button class="chip" data-k="${k}" aria-pressed="${k===bg}">${v}</button>`).join('')}</div>
+    <div class="row"><button class="btn primary" id="nameOk">Vytvořit a otevřít</button><button class="btn" data-close>Zrušit</button></div>`);
+  const i=$('#nameIn');i.focus();
+  bindPick($('#folderPick'),null,b=>folder=b.dataset.f);
+  bindPick($('#fmtPick'),null,b=>fk=b.dataset.k);
+  bindPick($('#bgPick'),null,b=>bg=b.dataset.k);
+  const ok=async()=>{
+    const id=uid(),now=Date.now(),data=blankDoc(fk,bg);
+    lib.docs.push({id,name:i.value.trim()||'Bez názvu',folderId:folder||null,created:now,updated:now,pages:1});
+    await kvSet('doc:'+id,data);await kvSet('lib',lib);closeSheet();openDoc(id);
+  };
+  $('#nameOk').onclick=ok;i.onkeydown=e=>{if(e.key==='Enter')ok();};
+}
+async function duplicateDoc(e){
+  const d=await kvGet('doc:'+e.id);if(!d){toast('Dokument se nepodařilo načíst');return;}
+  const id=uid(),now=Date.now();
+  lib.docs.push({...e,id,name:e.name+' (kopie)',created:now,updated:now});
+  await kvSet('doc:'+id,JSON.parse(JSON.stringify(d)));await kvSet('lib',lib);renderLibrary();toast('Dokument je zduplikovaný');
+}
+async function openDoc(id){
+  const e=entryById(id);if(!e){showLibrary();return;}
+  if(doc&&currentId&&currentId!==id) await saveNow();
+  let d=await kvGet('doc:'+id);
+  if(!d||!Array.isArray(d.pages)) d=blankDoc('a4p','lines');
+  d.texts=d.texts||[];d.strokes=d.strokes||[];d.images=d.images||[];
+  sel=new Set();selOff={x:0,y:0};selbar.hidden=true;undoStack=[];redoStack=[];action=null;ptrs.clear();closePop();
+  doc=d;currentId=id;
+  libEl.hidden=true;prefs.view='doc';prefs.lastDoc=id;savePrefs();
+  resize();updUndo();renderOverlay();
+  if(d.cam&&isFinite(d.cam.z)){cam=d.cam;applyCam();}
+  else{cam={x:0,y:0,z:1};const p=doc.pages[0];if(p)fitBox({x:p.x-40,y:p.y,w:Math.min(p.w*2.2,2400),h:p.h});else applyCam();}
+  setStatus(docPath());
+}
+
+/* ---------- toolbar ---------- */
+function setTool(t){
+  prefs.tool=t;savePrefs();document.body.dataset.tool=t;
+  document.querySelectorAll('[data-tool]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.tool===t));
+  if(t!=='lasso'&&sel.size) clearSel();
+  if(t!=='eraser') eraserHover(null);
+  renderOpts();
+}
+function renderOpts(){
+  const o=$('#opts'),t=prefs.tool;let h='';
+  if(t==='pen'||t==='marker'){
+    const cols=t==='pen'?PEN_COLORS:MARK_COLORS,names=t==='pen'?['Grafit','Kobalt','Červená','Zelená']:['Žlutá','Zelená','Růžová','Modrá'];
+    h+=cols.map((c,i)=>`<button class="sw" data-c="${i}" style="--c:${c}" aria-label="${names[i]}" title="${names[i]}" aria-pressed="${prefs.ts[t].c===i}"><span></span></button>`).join('');
+    h+='<span class="sep"></span>';
+  }
+  if(t==='pen'||t==='marker'||t==='eraser'){
+    const dots=t==='pen'?[4,7,11]:t==='marker'?[8,12,17]:[6,10,16],names=['Tenká','Střední','Silná'];
+    h+=dots.map((d,i)=>`<button class="sw sz" data-s="${i}" aria-label="${names[i]}" title="${names[i]}" aria-pressed="${prefs.ts[t].s===i}"><span style="width:${d}px;height:${d}px;${t==='marker'?'border-radius:3px;opacity:.75':''}${t==='eraser'?';background:transparent;border:1.6px solid var(--ink)':''}"></span></button>`).join('');
+  }
+  o.innerHTML=h;
+}
+$('#opts').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;const t=prefs.tool;
+  if(b.dataset.c!=null) prefs.ts[t].c=+b.dataset.c;
+  if(b.dataset.s!=null) prefs.ts[t].s=+b.dataset.s;
+  savePrefs();renderOpts();
+});
+document.querySelectorAll('[data-tool]').forEach(b=>{b.innerHTML=svg(b.dataset.tool);b.onclick=()=>setTool(b.dataset.tool);});
+$('#undo').innerHTML=svg('undo');$('#redo').innerHTML=svg('redo');
+$('#zoomIn').innerHTML=svg('plus',20);$('#zoomOut').innerHTML=svg('minus',20);$('#fit').innerHTML=svg('fit',20);
+$('#menuBtn').innerHTML=svg('lock',21);
+$('#undo').onclick=undo;$('#redo').onclick=redo;
+$('#zoomIn').onclick=()=>{zoomAt(W/2,H/2,cam.z*1.25);saveSoon("cam");};
+$('#zoomOut').onclick=()=>{zoomAt(W/2,H/2,cam.z/1.25);saveSoon("cam");};
+$('#zoomLabel').onclick=()=>{zoomAt(W/2,H/2,1);saveSoon("cam");};
+$('#fit').onclick=fitAll;
+$('#addPage').onclick=addPage;
+$('#menuBtn').onclick=openMenu;
+
+/* wheel + keyboard for desktop use */
+stage.addEventListener('wheel',e=>{
+  e.preventDefault();
+  if(e.ctrlKey||e.metaKey){const p=local(e);zoomAt(p.x,p.y,cam.z*Math.exp(-e.deltaY*.01));}
+  else{cam.x-=e.deltaX;cam.y-=e.deltaY;applyCam();}
+  saveSoon("cam");
+},{passive:false});
+document.addEventListener('gesturestart',e=>e.preventDefault());
+addEventListener('keydown',e=>{
+  const tag=(e.target&&e.target.tagName)||'';
+  if(tag==='TEXTAREA'||tag==='INPUT') return;
+  if(!libEl.hidden){if(e.key==='Escape'){closePop();closeSheet();}return;}
+  if(e.key==='Escape'){closePop();if(!sheet.hidden)closeSheet();else clearSel();return;}
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();e.shiftKey?redo():undo();return;}
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){e.preventDefault();redo();return;}
+  if(e.ctrlKey||e.metaKey||e.altKey) return;
+  if(e.code==='Space'){spaceDown=true;e.preventDefault();return;}
+  if((e.key==='Delete'||e.key==='Backspace')&&sel.size){$('#selDelete').click();return;}
+  const map={p:'pen',m:'marker',e:'eraser',l:'lasso',t:'text',h:'hand'};
+  if(map[e.key.toLowerCase()]&&sheet.hidden) setTool(map[e.key.toLowerCase()]);
+});
+addEventListener('keyup',e=>{if(e.code==='Space')spaceDown=false;});
+
+let toastT=0;
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2600);}
+
+/* ---------- sizing + boot ---------- */
+function resize(){
+  dpr=Math.min(window.devicePixelRatio||1,2.5);
+  W=stage.clientWidth;H=stage.clientHeight;rect=stage.getBoundingClientRect();
+  for(const c of [paper,cv,live]){c.width=Math.round(W*dpr);c.height=Math.round(H*dpr);}
+  if(cam&&doc){requestRender();positionSelbar();}
+}
+addEventListener('resize',resize);
+(async()=>{
+  resize();
+  setTool(prefs.tool||'pen');updUndo();
+  let L=await kvGet('lib');
+  if(!L||!Array.isArray(L.docs)){
+    L={v:1,folders:[],docs:[]};
+    const old=await kvGet('doc'), now=Date.now(), made=[];
+    if(old&&Array.isArray(old.pages)){
+      const id=uid();L.docs.push({id,name:'Můj první zápisník',folderId:null,created:now,updated:old.savedAt||now,pages:old.pages.length});
+      await kvSet('doc:'+id,old);made.push([id,old]);
+    }else{
+      L.folders.push({id:uid(),name:'Nápady',color:FOLDER_COLORS[0]});
+      const id=uid(),sd=seed();L.docs.push({id,name:'Vítej ve WRITE OUT',folderId:null,created:now,updated:now,pages:sd.pages.length});
+      await kvSet('doc:'+id,sd);made.push([id,sd]);
+    }
+    lib=L;
+    for(const [id,d] of made){doc={...d,texts:d.texts||[],strokes:d.strokes||[],images:d.images||[]};try{entryById(id).thumb=makeThumb();}catch(e){}}
+    doc=null;
+    await kvSet('lib',lib);
+  }else{lib=L;lib.folders=lib.folders||[];}
+  if(prefs.view==='doc'&&prefs.lastDoc&&entryById(prefs.lastDoc)) await openDoc(prefs.lastDoc);
+  else showLibrary();
+})();
+})();
+</script>
+
+
+<script>
+/* offline: register the service worker that keeps the app on this device */
+if('serviceWorker' in navigator && location.protocol==='https:'){
+  addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{});});
+}
+</script>
+</body></html>
