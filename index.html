@@ -1317,8 +1317,21 @@ async function fullBackup(){
   for(const e of lib.docs){docs[e.id]=await kvGet('doc:'+e.id);}
   return {kind:'writeout-library',v:1,savedAt:Date.now(),lib:{v:1,folders:lib.folders,docs:lib.docs},docs};
 }
+/* is the offline copy ready on this device? */
+async function offlineState(){
+  try{
+    if(!('serviceWorker' in navigator)) return 'no';
+    const reg=await navigator.serviceWorker.getRegistration();
+    if(!reg||!reg.active) return 'wait';
+    const ks=await caches.keys();
+    for(const k of ks){const c=await caches.open(k);if(await c.match('index.html')||await c.match('./')) return 'ok';}
+    return 'wait';
+  }catch(e){return 'wait';}
+}
 async function openMenu(){
   const lang=await hwLangP;
+  const off=await offlineState();
+  const home=navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
   const backup=await fullBackup();
   const json=JSON.stringify(backup);
   const nStrokes=Object.values(backup.docs).reduce((a,d)=>a+(d&&d.strokes?d.strokes.length:0),0);
@@ -1327,7 +1340,9 @@ async function openMenu(){
       <p>Dokumenty se ukládají jen do tohoto prohlížeče v tomto zařízení. Nic se neodesílá na server a nevidí je nikdo jiný, ani Claude, ani nikdo, komu pošleš odkaz na aplikaci. Kontrola pravopisu v prohlížeči je vypnutá, aby text neodcházel ven.</p>
       <p class="note">Když v prohlížeči smažeš data webů, dokumenty zmizí. Proto si občas udělej zálohu.</p>
       <dl class="kv"><dt>Složky</dt><dd>${lib.folders.length}</dd><dt>Dokumenty</dt><dd>${lib.docs.length}</dd><dt>Tahy perem</dt><dd>${nStrokes}</dd><dt>Velikost</dt><dd>${fmtSize(new Blob([json]).size)}</dd>
-      <dt>Převod rukopisu</dt><dd>${lang?`<span class="pill yes"><i></i>V zařízení (${lang==='cs'?'čeština':'angličtina'})</span>`:`<span class="pill no"><i></i>Tady nedostupný, na iPadu použij nástroj Text</span>`}</dd></dl>
+      <dt>Převod rukopisu</dt><dd>${lang?`<span class="pill yes"><i></i>V zařízení (${lang==='cs'?'čeština':'angličtina'})</span>`:`<span class="pill no"><i></i>Tady nedostupný, na iPadu použij nástroj Text</span>`}</dd>
+      <dt>Offline</dt><dd>${off==='ok'?`<span class="pill yes"><i></i>Připraveno, funguje i bez internetu</span>`:off==='no'?`<span class="pill no"><i></i>Tento prohlížeč offline neumí</span>`:`<span class="pill no"><i></i>Ještě ne, nech appku chvíli otevřenou s internetem</span>`}</dd>
+      <dt>Spuštěno</dt><dd>${home?'Z plochy':'V prohlížeči (offline a poznámky z plochy jsou zvlášť)'}</dd></dl>
     </section>
     <section><h3>Na plochu tabletu</h3>
       <ol><li>Otevři tuhle stránku v prohlížeči tabletu (Safari na iPadu, Chrome na Androidu).</li><li>Sdílet → Přidat na plochu (v Chromu menu ⋮ → Přidat na plochu).</li><li>WRITE OUT pak spouštěj z ikony. Dokumenty zůstávají v tom prohlížeči, kde jsi je napsala.</li></ol>
@@ -1655,7 +1670,7 @@ addEventListener('resize',resize);
 <script>
 /* offline: register the service worker that keeps the app on this device */
 if('serviceWorker' in navigator && location.protocol==='https:'){
-  addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{});});
+  navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{});
 }
 </script>
 </body></html>

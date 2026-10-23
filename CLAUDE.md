@@ -17,7 +17,8 @@ Texty jsou soukromé, i před AI. Nic se neposílá na server: data jsou v Index
 ## Technika
 - Všechno v jednom souboru `index.html` (HTML + CSS + JS, bez knihoven a bez build kroku).
 - Písma jsou v `fonts/` (Big Shoulders Display, IBM Plex Sans a Mono, Literata; latin + latin-ext), žádné Google Fonts, aby appka fungovala offline.
-- `sw.js`: offline režim. HTML ze sítě (max 3 s), jinak z cache; ostatní z cache. Při změně ikon, písem nebo manifestu zvyš `VERSION`.
+- `sw.js`: offline režim. HTML ze sítě (max 3 s), jinak z cache; ostatní z cache. Ukládá jen skutečné soubory appky (ne přesměrování ani chybové stránky, např. přihlášení k hotelové wifi). `index.html` a `./` musí jít stáhnout, zbytek je „best effort“. Při změně ikon, písem nebo manifestu zvyš `VERSION`.
+- V menu appky je řádek „Offline“: ukazuje, jestli je offline kopie v zařízení hotová.
 - Barvy jsou v CSS jako proměnné (`--desk`, `--chrome`, `--ink`, `--accent`…) se světlým i tmavým režimem.
 - Web: https://blue-folder.github.io/write-out/ (GitHub Pages z větve `main`), repozitář `Blue-Folder/write-out`.
 - Commity podepisuj jako `barbaritta <barbaritta@users.noreply.github.com>`, ne celým jménem ani osobním e-mailem.
